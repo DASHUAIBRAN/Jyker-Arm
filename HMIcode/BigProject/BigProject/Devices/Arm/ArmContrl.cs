@@ -136,8 +136,8 @@ namespace BigProject.Devices.Arm
                 {
                     if (valid[i])
                     {
-                        for (int j = 0; j < 6; j++)
-                            lastJoints.a[j] = ikSolves.config[i].a[j];
+                        //for (int j = 0; j < 6; j++)
+                        //    lastJoints.a[j] = ikSolves.config[i].a[j];
                         Joint6D_t tmp = currentJoints - lastJoints;
                         double maxAngle = AbsMaxOf6(tmp.a, out indexJoint);
                         if (maxAngle < min)
