@@ -9,7 +9,7 @@ jyker 机械臂是一款开源的3D 打印机械臂，硬件分为4个部分
 
 
 #### 螺钉安装
-![基座](Images/joint1.jpg)](Images/base.jpg)
+![基座](Images/base.jpg)
 ![第一轴](Images/joint1.jpg)
 ![第二轴](Images/joint2.jpg)
 ![第三轴](Images/joint3.jpg)
