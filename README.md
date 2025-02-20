@@ -10,18 +10,12 @@ jyker 机械臂是一款开源的3D 打印机械臂，硬件分为4个部分
 
 
 #### 螺钉安装
-1.基座
-![输入图片说明](https://foruda.gitee.com/images/1740033346022685332/d39a1722_2128761.jpeg "base.jpg")
-2.joint1
-![输入图片说明](https://foruda.gitee.com/images/1740033460938099330/84f4fadc_2128761.jpeg "joint1.jpg")
-3.joint2
-![输入图片说明](https://foruda.gitee.com/images/1740033485710462920/a2615412_2128761.jpeg "joint2.jpg")
-4.joint3
-![输入图片说明](https://foruda.gitee.com/images/1740033528623894177/5a5ff1c9_2128761.jpeg "joint3.jpg")
-5.joint4
-![输入图片说明](https://foruda.gitee.com/images/1740033551043314411/698ea2cc_2128761.jpeg "joint4.jpg")
-5.joint5
-![输入图片说明](https://foruda.gitee.com/images/1740033574919084200/f0459f3d_2128761.jpeg "joint5.jpg")
+![基座](https://foruda.gitee.com/images/1740033346022685332/d39a1722_2128761.jpeg "base.jpg")
+![第一轴](https://foruda.gitee.com/images/1740033460938099330/84f4fadc_2128761.jpeg "joint1.jpg")
+![第二轴](https://foruda.gitee.com/images/1740033485710462920/a2615412_2128761.jpeg "joint2.jpg")
+![第三轴](https://foruda.gitee.com/images/1740033528623894177/5a5ff1c9_2128761.jpeg "joint3.jpg")
+![第四轴](https://foruda.gitee.com/images/1740033551043314411/698ea2cc_2128761.jpeg "joint4.jpg")
+![第五轴](https://foruda.gitee.com/images/1740033574919084200/f0459f3d_2128761.jpeg "joint5.jpg")
 
 #### 安装教程
 
