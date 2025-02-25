@@ -1,10 +1,13 @@
 ﻿using BigProject.Devices.Arm.Kinematic.Models;
 using BigProject.Logger;
+using BigProject.Serials;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +19,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Linq;
+using System.Management;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+using System.Text.RegularExpressions;
+using System.Drawing;
+using BigProject.Devices.Arm;
+using Rubyer;
+using BigProject.JointMoveRecord;
+using System.Collections.ObjectModel;
 
 namespace BigProject
 {
@@ -50,7 +62,12 @@ namespace BigProject
             //添加日志输出
             Log.MessageEvent += Log_MessageEvent;
 
-            //按钮事件
+            //手动连接
+            bt_Link.Click += Bt_Link_Click;
+            //自动连接
+            bt_LinkAuto.Click += Bt_LinkAuto_Click;
+
+
             //回零
             bt_Home.Click += Bt_Home_Click;
             //立即停止
@@ -65,87 +82,251 @@ namespace BigProject
             bt_GetCurrentAngle.Click += Bt_GetCurrentAngle_Click;
             //赋值当前角度位置
             //MainWindow_UpdateJointAngle();
-            bt_OpenClaw.Click += Bt_OpenClaw_Click;
-            bt_CloseClaw.Click += Bt_CloseClaw_Click;
 
-            bt_MoveToDesk.Click += Bt_MoveToDesk_Click;
-            bt_MoveToMan.Click += Bt_MoveToMan_Click;
+            //加载串口列表
+            LoadComList();
+            //设置按钮不可按
+            SetButtomState(false);
+            //加载记录列表
+            LoadJointRecords();
+            
         }
 
-        //运动到我这
-        private void Bt_MoveToMan_Click(object sender, RoutedEventArgs e)
+        //加载记录列表
+        private void LoadJointRecords()
         {
-            var a1 = -45;
-            var a2 = 45;
-            var a3 = 60;
-            var a4 = 0;
-            var a5 = 0;
-            var a6 = 0;
-
-            App.Core.armContrl.MoveJ(a1, a2, a3, a4, a5, a6);
-            var pose6 = App.Core.armContrl.currentPose6D;
-            var joint = App.Core.armContrl.currentJoints;
-
-            tb_X.Text = Math.Round(pose6.X, 2) + "";
-            tb_Y.Text = Math.Round(pose6.Y, 2) + "";
-            tb_Z.Text = Math.Round(pose6.Z, 2) + "";
-            tb_A.Text = Math.Round(pose6.A, 2) + "";
-            tb_B.Text = Math.Round(pose6.B, 2) + "";
-            tb_C.Text = Math.Round(pose6.C, 2) + "";
-
-            tb_Joint1.Text = Math.Round(joint.a[0], 2) + "";
-            tb_Joint2.Text = Math.Round(joint.a[1], 2) + "";
-            tb_Joint3.Text = Math.Round(joint.a[2], 2) + "";
-            tb_Joint4.Text = Math.Round(joint.a[3], 2) + "";
-            tb_Joint5.Text = Math.Round(joint.a[4], 2) + "";
-            tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
-
-            App.Core.armContrl.MoveJoints();
+            App.Core.JointRecords = JointRecordRes.Read();
+            dg_JointRecord.ItemsSource = App.Core.JointRecords;
         }
 
-        //运动到桌面为止
-        private void Bt_MoveToDesk_Click(object sender, RoutedEventArgs e)
+
+        //设置手动移动机械臂
+        private void bt_MoveArmHand_Click(object sender, RoutedEventArgs e)
         {
-            var a1 = -10;
-            var a2 = 18;
-            var a3 = 160;
-            var a4 = 0;
-            var a5 = 0;
-            var a6 = 0;
-
-            App.Core.armContrl.MoveJ(a1, a2, a3, a4, a5, a6);
-            var pose6 = App.Core.armContrl.currentPose6D;
-            var joint = App.Core.armContrl.currentJoints;
-
-            tb_X.Text = Math.Round(pose6.X, 2) + "";
-            tb_Y.Text = Math.Round(pose6.Y, 2) + "";
-            tb_Z.Text = Math.Round(pose6.Z, 2) + "";
-            tb_A.Text = Math.Round(pose6.A, 2) + "";
-            tb_B.Text = Math.Round(pose6.B, 2) + "";
-            tb_C.Text = Math.Round(pose6.C, 2) + "";
-
-            tb_Joint1.Text = Math.Round(joint.a[0], 2) + "";
-            tb_Joint2.Text = Math.Round(joint.a[1], 2) + "";
-            tb_Joint3.Text = Math.Round(joint.a[2], 2) + "";
-            tb_Joint4.Text = Math.Round(joint.a[3], 2) + "";
-            tb_Joint5.Text = Math.Round(joint.a[4], 2) + "";
-            tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
-
-            App.Core.armContrl.MoveJoints();
+            this.Dispatcher.Invoke(() => {
+                var motorJ = App.Core.ArmContrl.motorJ;
+                for (int i = 0; i < motorJ.Length; i++)
+                {
+                    if (!App.Core.ArmContrl.SetIfEnable(i+1,false))
+                    {
+                        Log.Info($"电机{i + 1}设置失能状态失败");
+                    }
+                }
+            });
+            
         }
-
-        //关闭夹爪
-        private void Bt_CloseClaw_Click(object sender, RoutedEventArgs e)
+        //记录机械臂当前位置
+        private void bt_AddRecord_Click(object sender, RoutedEventArgs e)
         {
-            App.Core.armClaw.Close();
-        }
+            MainWindow_UpdateJointAngle();
+            this.Dispatcher.Invoke(() => {
+                var pose6 = App.Core.ArmContrl.currentPose6D;
+                var joint = App.Core.ArmContrl.currentJoints;
+                App.Core.JointRecords.Add(new JointMoveRecord.JointRecordModel
+                {
+                    AddTime = DateTime.Now,
+                    J1 = Math.Round(joint.a[0], 2),
+                    J2 = Math.Round(joint.a[1], 2),
+                    J3 = Math.Round(joint.a[2], 2),
+                    J4 = Math.Round(joint.a[3], 2),
+                    J5 = Math.Round(joint.a[4], 2),
+                    J6 = Math.Round(joint.a[5], 2),
 
-        //打开夹爪
-        private void Bt_OpenClaw_Click(object sender, RoutedEventArgs e)
+                    X = Math.Round(pose6.X, 2),
+                    Y = Math.Round(pose6.Y, 2),
+                    Z = Math.Round(pose6.Z, 2),
+                    A = Math.Round(pose6.A, 2),
+                    B = Math.Round(pose6.B, 2),
+                    C = Math.Round(pose6.C, 2),
+                });
+                dg_JointRecord.ItemsSource = App.Core.JointRecords;
+                JointRecordRes.Write(App.Core.JointRecords);
+            });
+            
+        }
+        //循环运动机械臂
+        bool JointLoopIsRun = false;
+        private void bt_MoveLoop_Click(object sender, RoutedEventArgs e)
         {
-            App.Core.armClaw.Open();
+            if (JointLoopIsRun) return;
+            var motorJ = App.Core.ArmContrl.motorJ;
+            for (int i = 0; i < motorJ.Length; i++)
+            {
+                if (!App.Core.ArmContrl.SetIfEnable(i + 1, true))
+                {
+                    Log.Info($"电机{i + 1}设置使能状态失败");
+                }
+            }
+            JointLoopIsRun = true;
+            Task.Run(() => {
+                while (JointLoopIsRun)
+                {
+                    Thread.Sleep(50);
+                    foreach (var rec in App.Core.JointRecords)
+                    {
+                        if (!JointLoopIsRun) return;
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            dg_JointRecord.SelectedItem = rec;
+                        });
+                        App.Core.ArmContrl.currentJoints.a[0] = rec.J1;
+                        App.Core.ArmContrl.currentJoints.a[1] = rec.J2;
+                        App.Core.ArmContrl.currentJoints.a[2] = rec.J3;
+                        App.Core.ArmContrl.currentJoints.a[3] = rec.J4;
+                        App.Core.ArmContrl.currentJoints.a[4] = rec.J5;
+                        App.Core.ArmContrl.currentJoints.a[5] = rec.J6;
+                        App.Core.ArmContrl.MoveJoints();
+                        Thread.Sleep(100);
+                        while (!App.Core.ArmContrl.IsMoveOver())
+                        {
+                            if (!JointLoopIsRun) return;
+                            Thread.Sleep(2000);
+                        }
+                    }
+                }
+                App.Core.ArmContrl.ArmStopNow();
+            });
+        }
+        //停止循环
+        private void bt_MoveLoopStop_Click(object sender, RoutedEventArgs e)
+        {
+            JointLoopIsRun = false;
+        }
+        //删除记录
+        private void bt_DeleteRecord_Click(object sender, RoutedEventArgs e)
+        {
+            if(dg_JointRecord.SelectedItem==null)
+            {
+                MessageBoxR.Show("请先选择一条记录.");
+                return;
+            }
+            var rec = dg_JointRecord.SelectedItem as JointRecordModel;
+            App.Core.JointRecords.Remove(rec);
+            dg_JointRecord.ItemsSource = App.Core.JointRecords;
+            JointRecordRes.Write(App.Core.JointRecords);
+        }
+        //设置按钮状态
+        private void SetButtomState(bool State = false)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                bt_Home.IsEnabled = State;
+                bt_StopNow.IsEnabled = State;
+                bt_FK.IsEnabled = State;
+                bt_IK.IsEnabled = State;
+                bt_MoveJoint.IsEnabled = State;
+                bt_GetCurrentAngle.IsEnabled = State;
+                bt_AddRecord.IsEnabled = State;
+                bt_MoveArmHand.IsEnabled = State;
+                bt_MoveLoop.IsEnabled = State;
+                bt_MoveLoopStop.IsEnabled = State;
+                bt_DeleteRecord.IsEnabled = State;
+            });
+        }
+        //加载串口列表
+        private List<string> LoadComList()
+        {
+            // 查询所有串口设备
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(
+                "SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)' AND Caption LIKE '%USB%'");
+            var list = new List<string>();
+            this.Dispatcher.Invoke(() => {
+                cb_ComList.Items.Clear();
+                foreach (var port in searcher.Get())
+                {
+                    string caption = port["Caption"]?.ToString() ?? "无描述";
+                    Match match = Regex.Match(caption, @"COM\d+");
+                    if (match.Success)
+                    {
+                        string comPortName = match.Value; // 提取匹配到的 COM 名称
+                        cb_ComList.Items.Add(comPortName);
+                        list.Add(comPortName);
+                    }
+                    
+                }
+            });
+            
+            return list;
         }
 
+        //自动连接
+        private void Bt_LinkAuto_Click(object sender, RoutedEventArgs e)
+        {
+            var list = LoadComList();
+            //连接
+
+            Task.Run(() => {
+                //加载串口列表
+                try
+                {
+                    foreach (var item in list)
+                    {
+                        Log.Info($"尝试连接{item}...");
+                        var result = App.Core.InitArm(item);
+                        if (result)
+                        {
+                            var res =App.Core.ArmSerial.SendMsgForResult(new byte[3] { 0x01, 0x33, 0x6b },out byte[] resMsg);
+                            Thread.Sleep(500);
+                            if (res&&resMsg[0] > 0)
+                            {
+                                Log.Info($"{item}连接成功，找到jyker机械臂");
+                                this.Dispatcher.Invoke(() => {
+                                    cb_ComList.SelectedItem = item;
+                                    bt_LinkAuto.IsEnabled = false;
+                                    cb_ComList.IsEnabled = false;
+                                    bt_Link.Content = "断开连接";
+                                    SetButtomState(true);
+
+                                    //读取位置信息并赋值
+                                    MainWindow_UpdateJointAngle();
+                                });
+                            }
+                            else
+                            {
+                                if(result)
+                                {
+                                    App.Core.ArmDispose();
+                                }
+                            }
+                        }
+
+                    } 
+                }
+                catch (Exception ex)
+                {
+                    Log.Info(ex.ToString());
+                }
+            });
+
+
+        }
+        //手动连接
+        private void Bt_Link_Click(object sender, RoutedEventArgs e)
+        {
+            if (bt_Link.Content.ToString() == "断开连接")
+            {
+                bt_LinkAuto.IsEnabled = true;
+                cb_ComList.IsEnabled = true;
+                bt_Link.Content = "手动连接";
+                App.Core.ArmDispose();
+                SetButtomState(false);
+            }
+            else
+            {
+                var name = cb_ComList.SelectedItem + "";
+                var result = App.Core.InitArm(name);
+                if (result)
+                {
+                    bt_LinkAuto.IsEnabled = false;
+                    cb_ComList.IsEnabled = false;
+                    bt_Link.Content = "断开连接";
+                    SetButtomState(true);
+                    //读取位置信息并赋值
+                    MainWindow_UpdateJointAngle();
+                }
+            }
+        }
+        //获取当前电机目标位置
         private void Bt_GetCurrentAngle_Click(object sender, RoutedEventArgs e)
         {
             MainWindow_UpdateJointAngle();
@@ -154,50 +335,49 @@ namespace BigProject
         //获取当前角度位置
         private void MainWindow_UpdateJointAngle()
         {
-            Task.Run(() =>
-            {
-                this.Dispatcher.Invoke(() => {
-                    var motorJ = App.Core.armContrl.motorJ;
-                    for (int i = 0; i < motorJ.Length; i++)
+            this.Dispatcher.Invoke(() => {
+                var motorJ = App.Core.ArmContrl.motorJ;
+                for (int i = 0; i < motorJ.Length; i++)
+                {
+                    if(!App.Core.ArmContrl.GetCurrentAngle(i + 1, motorJ[i],out double angle))
                     {
-                        App.Core.armContrl.GetCurrentAngle(i + 1, motorJ[i]);
+                        Log.Info($"电机{i + 1}角度获取失败");
                     }
+                }
 
-                    var a1 = motorJ[0].CurrentAngle;
-                    var a2 = motorJ[1].CurrentAngle;
-                    var a3 = motorJ[2].CurrentAngle;
-                    var a4 = motorJ[3].CurrentAngle;
-                    var a5 = motorJ[4].CurrentAngle;
-                    var a6 = motorJ[5].CurrentAngle;
+                var a1 = motorJ[0].CurrentAngle;
+                var a2 = motorJ[1].CurrentAngle;
+                var a3 = motorJ[2].CurrentAngle;
+                var a4 = motorJ[3].CurrentAngle;
+                var a5 = motorJ[4].CurrentAngle;
+                var a6 = motorJ[5].CurrentAngle;
 
-                    App.Core.armContrl.MoveJ(a1, a2, a3, a4, a5, a6);
-                    var pose6 = App.Core.armContrl.currentPose6D;
-                    var joint = App.Core.armContrl.currentJoints;
-                    App.Core.armContrl.lastJoints = App.Core.armContrl.currentJoints;
+                App.Core.ArmContrl.MoveJ(a1, a2, a3, a4, a5, a6);
+                var pose6 = App.Core.ArmContrl.currentPose6D;
+                var joint = App.Core.ArmContrl.currentJoints;
 
-                    tb_X.Text = Math.Round(pose6.X, 2) + "";
-                    tb_Y.Text = Math.Round(pose6.Y, 2) + "";
-                    tb_Z.Text = Math.Round(pose6.Z, 2) + "";
-                    tb_A.Text = Math.Round(pose6.A, 2) + "";
-                    tb_B.Text = Math.Round(pose6.B, 2) + "";
-                    tb_C.Text = Math.Round(pose6.C, 2) + "";
+                tb_X.Text = Math.Round(pose6.X, 2) + "";
+                tb_Y.Text = Math.Round(pose6.Y, 2) + "";
+                tb_Z.Text = Math.Round(pose6.Z, 2) + "";
+                tb_A.Text = Math.Round(pose6.A, 2) + "";
+                tb_B.Text = Math.Round(pose6.B, 2) + "";
+                tb_C.Text = Math.Round(pose6.C, 2) + "";
 
-                    tb_Joint1.Text = Math.Round(joint.a[0], 2) + "";
-                    tb_Joint2.Text = Math.Round(joint.a[1], 2) + "";
-                    tb_Joint3.Text = Math.Round(joint.a[2], 2) + "";
-                    tb_Joint4.Text = Math.Round(joint.a[3], 2) + "";
-                    tb_Joint5.Text = Math.Round(joint.a[4], 2) + "";
-                    tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
-                });
+                tb_Joint1.Text = Math.Round(joint.a[0], 2) + "";
+                tb_Joint2.Text = Math.Round(joint.a[1], 2) + "";
+                tb_Joint3.Text = Math.Round(joint.a[2], 2) + "";
+                tb_Joint4.Text = Math.Round(joint.a[3], 2) + "";
+                tb_Joint5.Text = Math.Round(joint.a[4], 2) + "";
+                tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
             });
 
-            
+
         }
 
         //让机械臂运动
         private void Bt_MoveJoint_Click(object sender, RoutedEventArgs e)
         {
-            App.Core.armContrl.MoveJoints();
+            App.Core.ArmContrl.MoveJoints();
         }
 
         //逆解计算
@@ -210,12 +390,12 @@ namespace BigProject
             double.TryParse(tb_B.Text, out double b);
             double.TryParse(tb_C.Text, out double c);
 
-            var res =App.Core.armContrl.MoveL(x, y, z, a, b, c);
+            var res =App.Core.ArmContrl.MoveL(x, y, z, a, b, c);
             if(!res)
             {
                 Log.Info("逆解无解");
             }
-            var joint = App.Core.armContrl.currentJoints;
+            var joint = App.Core.ArmContrl.currentJoints;
 
             tb_Joint1.Text = Math.Round(joint.a[0],2) + "";
             tb_Joint2.Text = Math.Round(joint.a[1],2) + "";
@@ -235,12 +415,12 @@ namespace BigProject
             double.TryParse(tb_Joint6.Text, out double a6);
 
              
-            bool isSole = App.Core.armContrl.MoveJ(a1, a2, a3, a4, a5, a6);
+            bool isSole = App.Core.ArmContrl.MoveJ(a1, a2, a3, a4, a5, a6);
             if(!isSole)
             {
                 Log.Info("角度限制无法解除");
             }
-            var pose6 = App.Core.armContrl.currentPose6D;
+            var pose6 = App.Core.ArmContrl.currentPose6D;
 
             tb_X.Text = Math.Round(pose6.X, 2) + "";
             tb_Y.Text = Math.Round(pose6.Y, 2) + "";
@@ -253,33 +433,45 @@ namespace BigProject
         //立即停止
         private void Bt_StopNow_Click(object sender, RoutedEventArgs e)
         {
-            App.Core.armContrl.ArmStopNow();
+            App.Core.ArmContrl.ArmStopNow();
         }
 
         //回零操作
-        private void Bt_Home_Click(object sender, RoutedEventArgs e)
+        private async void Bt_Home_Click(object sender, RoutedEventArgs e)
         {
-            App.Core.armContrl.Homing();
+            var result = await MessageBoxR.Show("注意！非金属减速机版本请手动回零，否则容易损坏减速器！确定要回零吗?",
+                "确认操作",
+                MessageBoxButton.OKCancel,
+                MessageBoxType.Question);
+            if(result == MessageBoxResult.OK)
+            {
+                App.Core.ArmContrl.Homing();
 
-            //回零之后更新正逆解参数
-            App.Core.armContrl.MoveJ(0, -90, 180,0, 0, 0);
-            var pose6 = App.Core.armContrl.currentPose6D;
-            var joint = App.Core.armContrl.currentJoints;
+                //回零之后更新正逆解参数
+                App.Core.ArmContrl.MoveJ(0, -90, 180, 0, 90, 0);
+                var pose6 = App.Core.ArmContrl.currentPose6D;
+                var joint = App.Core.ArmContrl.currentJoints;
 
-            tb_X.Text = Math.Round(pose6.X, 2) + "";
-            tb_Y.Text = Math.Round(pose6.Y, 2) + "";
-            tb_Z.Text = Math.Round(pose6.Z, 2) + "";
-            tb_A.Text = Math.Round(pose6.A, 2) + "";
-            tb_B.Text = Math.Round(pose6.B, 2) + "";
-            tb_C.Text = Math.Round(pose6.C, 2) + "";
+                tb_X.Text = Math.Round(pose6.X, 2) + "";
+                tb_Y.Text = Math.Round(pose6.Y, 2) + "";
+                tb_Z.Text = Math.Round(pose6.Z, 2) + "";
+                tb_A.Text = Math.Round(pose6.A, 2) + "";
+                tb_B.Text = Math.Round(pose6.B, 2) + "";
+                tb_C.Text = Math.Round(pose6.C, 2) + "";
 
-            tb_Joint1.Text = Math.Round(joint.a[0], 2) + "";
-            tb_Joint2.Text = Math.Round(joint.a[1], 2) + "";
-            tb_Joint3.Text = Math.Round(joint.a[2], 2) + "";
-            tb_Joint4.Text = Math.Round(joint.a[3], 2) + "";
-            tb_Joint5.Text = Math.Round(joint.a[4], 2) + "";
-            tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
+                tb_Joint1.Text = Math.Round(joint.a[0], 2) + "";
+                tb_Joint2.Text = Math.Round(joint.a[1], 2) + "";
+                tb_Joint3.Text = Math.Round(joint.a[2], 2) + "";
+                tb_Joint4.Text = Math.Round(joint.a[3], 2) + "";
+                tb_Joint5.Text = Math.Round(joint.a[4], 2) + "";
+                tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
+            }
+            
         }
+
+
+
+        #region 托盘右键菜单
 
         private void MainWindow_StateChanged(object sender, EventArgs e)
         {
@@ -302,7 +494,7 @@ namespace BigProject
                 this.notifyIcon.Icon = icon;
                 this.notifyIcon.Visible = true;
                 notifyIcon.MouseDoubleClick += OnNotifyIconDoubleClick;
-                
+
             }
 
         }
@@ -312,9 +504,6 @@ namespace BigProject
             this.Show();
             WindowState = wsl;
         }
-
-
-        #region 托盘右键菜单
         private void contextMenu()
         {
             ContextMenuStrip cms = new ContextMenuStrip();
@@ -375,6 +564,10 @@ namespace BigProject
                 richTextLine++;
             });
         }
+
+
         #endregion
+
+
     }
 }

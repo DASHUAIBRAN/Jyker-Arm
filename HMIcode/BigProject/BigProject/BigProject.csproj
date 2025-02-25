@@ -67,6 +67,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Security.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.AccessControl.5.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
     </Reference>
@@ -124,12 +125,10 @@
     <Compile Include="Devices\Arm\Kinematic\Models\Joint6D_t.cs" />
     <Compile Include="Devices\Arm\Kinematic\Models\Pose6D_t.cs" />
     <Compile Include="Devices\BaseDevice.cs" />
-    <Compile Include="Devices\Fan\FanDevice.cs" />
-    <Compile Include="Devices\NightLight\NightLightDevice.cs" />
-    <Compile Include="Devices\WallPainting\WallPaintingDevice.cs" />
+    <Compile Include="JointMoveRecord\JointRecordModel.cs" />
+    <Compile Include="JointMoveRecord\JointRecordRes.cs" />
     <Compile Include="Logger\Log.cs" />
     <Compile Include="Serials\ArmSerial.cs" />
-    <Compile Include="Serials\AssistantSerial.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -139,7 +138,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core.cs" />
-    <Compile Include="Devices\DeskLamp\DeskLampDevice.cs" />
     <Compile Include="Devices\IDevice.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

@@ -12,19 +12,18 @@ namespace BigProject.Devices.Arm
     {
         public ArmLed() {
             DeviceType = DeviceType.ArmLed;
-            Log.Info($"机械臂灯{this.Id} 已连接");
         }
 
         //开启机械臂的灯
         public void Open()
         {
-            App.Core.armSerial.LedOpen();
+            App.Core.ArmSerial.LedOpen();
         }
 
         //关闭机械臂的灯
         public void Close()
         {
-            App.Core.armSerial.LedClose();
+            App.Core.ArmSerial.LedClose();
         }
     }
 }

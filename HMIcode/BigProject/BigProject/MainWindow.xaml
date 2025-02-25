@@ -11,60 +11,62 @@
         d:DesignHeight="1024" 
         WindowStartupLocation="CenterScreen"  
         Title="JYKER" >
-    <Grid rubyer:GridHelper.ColumnDefinitions="*,300">
+    <Grid rubyer:GridHelper.ColumnDefinitions="*,600,300">
         <Grid Grid.Column="0" Margin="10">
             <Image x:Name="ImageBig" ></Image>
             <Grid rubyer:GridHelper.ColumnDefinitions="*"  VerticalAlignment="Top" HorizontalAlignment="Right">
                 <TextBlock FontSize="60" Grid.Column="0" Foreground="Red" Panel.ZIndex="3" x:Name="ResultTextInPic" ></TextBlock>
             </Grid>
         </Grid>
+        <Grid Grid.Column="1"   rubyer:GridHelper.RowDefinitions="300,*">
+            <GroupBox  Header="点位循环记录">
+                <DataGrid x:Name="dg_JointRecord" rubyer:ControlHelper.FocusedForegroundBrush="{StaticResource Accent}" AutoGenerateColumns="False" BorderThickness="1" CanUserAddRows="False" GridLinesVisibility="All" IsReadOnly="True" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="auto" Binding="{Binding J1}" Header="J1" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J2}" Header="J2" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J3}" Header="J3" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J4}" Header="J4" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J5}" Header="J5" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J6}" Header="J6" />
 
-        <Grid Grid.Column="1" rubyer:GridHelper.RowDefinitions="140,580,*" Margin="5,2,5,5">
+                        <DataGridTextColumn Width="auto" Binding="{Binding X}" Header="X" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding Y}" Header="Y" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding Z}" Header="Z" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding A}" Header="A" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding B}" Header="B" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding C}" Header="C" />
+                        <DataGridTextColumn Visibility="Collapsed" x:Name="AddTime" Binding="{Binding AddTime}" Header="AddTime" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Column="2" rubyer:GridHelper.RowDefinitions="100,610,*" Margin="5,2,5,5">
 
-            <GroupBox Grid.Row="0"  Header="硬件连接情况"  Margin="5,0,5,0">
+            <GroupBox Grid.Row="0"  Header="机器手连接"  Margin="5,0,5,0">
                 <Grid rubyer:GridHelper.RowDefinitions="30,30,30,*">
-                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*">
-                        <Grid Grid.Column="0" >
-                            <Ellipse HorizontalAlignment="Left" Height="20" Fill="Green" Stroke="Black" Width="20" x:Name="X706"/>
-                            <TextBlock Margin="25,0,0,0" FontWeight="Bold">台灯</TextBlock>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="auto,*">
+                        <Grid Margin="2">
+                            <Label>端口：</Label>
                         </Grid>
-                        <Grid Grid.Column="1" >
-                            <Ellipse HorizontalAlignment="Left" Height="20" Fill="Green" Stroke="Black" Width="20" x:Name="X0"/>
-                            <TextBlock Margin="25,0,0,0" FontWeight="Bold">风扇</TextBlock>
+                        <Grid Margin="2" Grid.Column="1">
+                            <ComboBox x:Name="cb_ComList" />
                         </Grid>
-
                     </Grid>
                     <Grid Grid.Row="1" rubyer:GridHelper.ColumnDefinitions="*,*">
-                        <Grid Grid.Column="0">
-                            <Ellipse HorizontalAlignment="Left" Height="20" Fill="Green" Stroke="Black" Width="20" x:Name="X1"/>
-                            <TextBlock Margin="25,0,0,0" FontWeight="Bold">夜灯1</TextBlock>
-                        </Grid>
-                        <Grid Grid.Column="1" >
-                            <Ellipse HorizontalAlignment="Left" Height="20" Fill="Green" Stroke="Black" Width="20" x:Name="X2"/>
-                            <TextBlock Margin="25,0,0,0" FontWeight="Bold">夜灯2</TextBlock>
-                        </Grid>
-                    </Grid>
-                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*"  Grid.Row="2">
-                        <Grid Grid.Column="0" >
-                            <Ellipse HorizontalAlignment="Left" Height="20" Fill="Green" Stroke="Black" Width="20" x:Name="X4"/>
-                            <TextBlock Margin="25,0,0,0" FontWeight="Bold">海报</TextBlock>
-                        </Grid>
-                        <Grid Grid.Column="1" >
-                            <Ellipse HorizontalAlignment="Left" Height="20" Fill="Green" Stroke="Black" Width="20" x:Name="X5"/>
-                            <TextBlock Margin="25,0,0,0" FontWeight="Bold">机械臂</TextBlock>
-                        </Grid>
+                        <Button x:Name="bt_Link" Margin="2">手动连接</Button>
+                        <Button x:Name="bt_LinkAuto" Margin="2" Grid.Column="1">自动连接</Button>
                     </Grid>
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Row="1" Header="操作"  Margin="5,0,5,0">
-                <Grid rubyer:GridHelper.RowDefinitions="30,30,30,30,30,30,20,30,30,30,30,30,30,30,30,30,30,30,*">
+                <Grid rubyer:GridHelper.RowDefinitions="30,30,30,30,30,30,20,30,30,30,30,30,30,30,30,30,30,30,30,*">
  
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="0">
                         <Grid Grid.Column="0" Margin="2">
                             <TextBlock>X:</TextBlock>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <TextBox x:Name="tb_X">100</TextBox>
+                            <TextBox x:Name="tb_X">0</TextBox>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="1">
@@ -72,7 +74,7 @@
                             <TextBlock>Y:</TextBlock>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <TextBox x:Name="tb_Y">100</TextBox>
+                            <TextBox x:Name="tb_Y">0</TextBox>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="2">
@@ -80,7 +82,7 @@
                             <TextBlock>Z:</TextBlock>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <TextBox x:Name="tb_Z">100</TextBox>
+                            <TextBox x:Name="tb_Z">0</TextBox>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="3">
@@ -182,18 +184,23 @@
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="16">
                         <Grid Grid.Column="0" Margin="2">
-                            <Button x:Name="bt_OpenClaw">打开夹爪</Button>
+                            <Button x:Name="bt_MoveArmHand" Click="bt_MoveArmHand_Click">手动移动机械臂</Button>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <Button x:Name="bt_CloseClaw">关闭夹爪</Button>
+                            <Button x:Name="bt_AddRecord" Click="bt_AddRecord_Click">记录点位</Button>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="17">
                         <Grid Grid.Column="0" Margin="2">
-                            <Button x:Name="bt_MoveToDesk">运动到目标点</Button>
+                            <Button x:Name="bt_MoveLoop" Click="bt_MoveLoop_Click">循环运动</Button>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <Button x:Name="bt_MoveToMan">运动到我这</Button>
+                            <Button x:Name="bt_MoveLoopStop" Click="bt_MoveLoopStop_Click" Cursor="Hand">停止循环</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="18">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_DeleteRecord" Click="bt_DeleteRecord_Click">删除记录</Button>
                         </Grid>
                     </Grid>
                 </Grid>

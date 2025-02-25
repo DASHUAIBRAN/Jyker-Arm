@@ -26,6 +26,6 @@ namespace BigProject.Devices.Arm.Kinematic.Models
             return tmp;
         }
 
-        public static Joint6D_t defult = new Joint6D_t(0, -90, 180, 0, 0, 0);
+        public static Joint6D_t defult = new Joint6D_t(-90, -90, 180, 0, -90, 0);
     }
 }

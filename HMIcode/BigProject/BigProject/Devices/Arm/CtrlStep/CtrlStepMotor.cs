@@ -28,7 +28,7 @@ namespace BigProject.Devices.Arm.CtrlStep
         /// <summary>
         /// 加速度
         /// </summary>
-        public double Acceleration { get; set; } = 20;
+        public double Acceleration { get; set; } = 0;
         /// <summary>
         /// 速度
         /// </summary>
@@ -44,7 +44,7 @@ namespace BigProject.Devices.Arm.CtrlStep
         /// <summary>
         /// 电机方向
         /// </summary>
-        public int Direction { get; set; } = 1;
+        public int Direction { get; set; } = 0;
         /// <summary>
         /// 3200个脉冲转一圈
         /// </summary>

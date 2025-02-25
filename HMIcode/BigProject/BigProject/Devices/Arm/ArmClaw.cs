@@ -11,13 +11,13 @@ namespace BigProject.Devices.Arm
         //开启夹爪
         public void Open()
         {
-            App.Core.armSerial.CtrClaw(40,140,40);
+            App.Core.ArmSerial.CtrClaw(40,140,40);
         }
 
         //关闭夹爪
         public void Close()
         {
-            App.Core.armSerial.CtrClaw(80, 110, 80);
+            App.Core.ArmSerial.CtrClaw(80, 110, 80);
         }
-    }
+    } 
 }

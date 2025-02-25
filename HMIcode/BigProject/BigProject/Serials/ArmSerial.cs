@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Interop;
 
@@ -17,37 +18,53 @@ namespace BigProject.Serials
         public int recCount = 8;
         public List<byte> DataReceived = new List<byte>();
         private System.IO.Ports.SerialPort serialPort1 = new System.IO.Ports.SerialPort();
-        public ArmSerial(string name1 = "COM12")
+        public ArmSerial(string name1,out bool OpenResult)
         {
-
-            if (!serialPort1.IsOpen)
+            try
             {
-                serialPort1.BaudRate = 115200;
-                serialPort1.PortName = name1;
-                serialPort1.Open();
-                serialPort1.DataReceived += SerialPort1_DataReceived;
-                
+                if (!serialPort1.IsOpen)
+                {
+                    serialPort1.BaudRate = 115200;
+                    serialPort1.PortName = name1;
+                    serialPort1.Open();
+                    serialPort1.ReadTimeout = 500; // 设置读取超时时间（毫秒）
+                    serialPort1.WriteTimeout = 500; // 设置写入超时时间（毫秒）
+                    //serialPort1.DataReceived += SerialPort1_DataReceived;
+
+                }
+                OpenResult = true;
+            }
+            catch (Exception)
+            {
+                OpenResult = false;
             }
 
+
+        }
+
+        public bool SerialDispose()
+        {
+            serialPort1.Close();
+            return true;
         }
 
         //开启机械臂灯光
         public void LedOpen()
         {
             LightBrightness = 10;
-            SendMsg(new byte[] { 0xFF, 0xFF, 0, 0, 0, 10,0x6B });
+            SendMsgForResult(new byte[] { 0xFF, 0xFF, 0, 0, 0, 10,0x6B }, out byte[] msg);
         }
 
         //关闭机械臂灯光
         public void LedClose()
         {
             LightBrightness = 0;
-            SendMsg(new byte[] { 0xFF, 0xFF, 0, 0, 0, 0, 0x6B });
+            SendMsgForResult(new byte[] { 0xFF, 0xFF, 0, 0, 0, 0, 0x6B }, out byte[] msg);
         }
 
         public void CtrClaw(int angleA, int angleB,int angleC)
         {
-            SendMsg(new byte[] { 0xFF, 0xFF, (byte)angleA, (byte)angleB, (byte)angleC, (byte)LightBrightness, 0x6B });
+            SendMsgForResult(new byte[] { 0xFF, 0xFF, (byte)angleA, (byte)angleB, (byte)angleC, (byte)LightBrightness, 0x6B },out byte[] msg);
         }
 
         //接收byte数据
@@ -60,11 +77,11 @@ namespace BigProject.Serials
             {
                 return;
             }
-            DataReceived.AddRange(rec.Take(recCount).ToArray());
+            DataReceived.AddRange(rec);
         }
 
         //发送数据
-        public void SendMsg(byte[] msg)
+        public void SendMsgOnly(byte[] msg)
         {
             DataReceived.Clear();
             string x = "";
@@ -77,6 +94,41 @@ namespace BigProject.Serials
                 serialPort1.Write(msg, 0, msg.Length);
         }
 
+        public bool SendMsgForResult(byte[] msg  ,out byte[] recMsg, int readLenth=128)
+        {
+            recMsg = new byte[readLenth];
+            try
+            {
+                string x = "";
+                for (int i = 0; i < msg.Length; i++)
+                {
+                    x += msg[i].ToString("x2") + " ";
+                }
+                //Log.Info($"数据发送_{x}");
+                if (!serialPort1.IsOpen)
+                {
+                    return false;
+
+                }
+                serialPort1.Write(msg, 0, msg.Length);
+                Thread.Sleep(20);
+                serialPort1.Read(recMsg, 0, recMsg.Length);
+                Thread.Sleep(20);
+                string y = "";
+                for (int i = 0; i < recMsg.Length; i++)
+                {
+                    y += recMsg[i].ToString("x2") + " ";
+                }
+                //Log.Info($"数据返回_{y}");
+                return true;
+            }
+            catch (System.TimeoutException)
+            {
+                return false;
+            }
+            
+        }
+
         //多圈堵转回零
         public bool Zero(int addr = 1)
         {
@@ -87,7 +139,7 @@ namespace BigProject.Serials
             //其他默认字节
             bytes.AddRange(new byte[] { 0x9A, 0x02, 0x00, 0x6B });
             //发送命令
-            SendMsg(bytes.ToArray());
+            SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
 
             return true;
         }
@@ -102,7 +154,7 @@ namespace BigProject.Serials
             //其他默认字节
             bytes.AddRange(new byte[] { 0x93, 0x88, 0x01, 0x6B });
             //发送命令
-            SendMsg(bytes.ToArray());
+            SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
 
             return true;
         }
@@ -137,7 +189,7 @@ namespace BigProject.Serials
             //校验位
             bytes.AddRange(new byte[] { 0x6B });
             //发送命令
-            SendMsg(bytes.ToArray());
+            SendMsgForResult(bytes.ToArray(),out byte[] resMsg);
             return true;
         }
 
@@ -177,7 +229,7 @@ namespace BigProject.Serials
             //校验位
             bytes.AddRange(new byte[] { 0x6B });
             //发送命令
-            SendMsg(bytes.ToArray());
+            SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
 
         }
 
@@ -188,7 +240,7 @@ namespace BigProject.Serials
         {
             byte[] bytes = new byte[4] { 0x00, 0xFF, 0x66, 0x6B };
             //发送命令
-            SendMsg(bytes.ToArray());
+            SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
         }
 
         /// <summary>

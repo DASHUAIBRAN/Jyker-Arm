@@ -190,6 +190,10 @@ namespace BigProject.Devices.Arm.Kinematic
             pose.A = (float)(P06[3] * RAD_TO_DEG);
             pose.B = (float)(P06[4] * RAD_TO_DEG);
             pose.C = (float)(P06[5] * RAD_TO_DEG);
+
+            //pose.A = (float)(P06[3]);
+            //pose.B = (float)(P06[4]);
+            //pose.C = (float)(P06[5]);
             pose.R = R06.ToArray();
 
             return true;

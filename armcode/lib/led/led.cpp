@@ -13,6 +13,7 @@ void ledsetup() {
       /* code */
       leds[i] = CRGB::White;
     }
+    FastLED.show();
 }
 
 
