@@ -16,7 +16,11 @@ jyker 机械臂是一款开源的3D 打印机械臂，硬件分为4个部分
 ![第四轴](Images/joint4.jpg)
 ![第五轴](Images/joint5.jpg)
 
+#### 电机对应位置以及ID设置
+![输入图片说明](Images/1740470939621.jpg)
+
 #### 安装教程
-1.  减速机安装教程：https://www.bilibili.com/video/BV1816yYHE2C/?vd_source=d81fb23162409ba3460eb9de840d7b4a
+https://www.bilibili.com/video/BV1816yYHE2C/?vd_source=d81fb23162409ba3460eb9de840d7b4a
+
 #### 软件使用
 1. TODO
