@@ -27,7 +27,7 @@ namespace BigProject.Devices.Arm
         public Joint6D_t lastJoints;
         public Joint6D_t currentJoints;
         public Pose6D_t currentPose6D;
-        public ArmSerial serialControl;
+        private ArmSerial serialControl;
 
         public event Action<double, double, double, double, double, double> UpdateJointAngle;
         public ArmContrl(ArmConfig armConfig,ArmSerial armSerial)

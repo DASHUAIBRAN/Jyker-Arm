@@ -62,24 +62,9 @@ namespace BigProject
             //添加日志输出
             Log.MessageEvent += Log_MessageEvent;
 
-            //手动连接
-            bt_Link.Click += Bt_Link_Click;
-            //自动连接
-            bt_LinkAuto.Click += Bt_LinkAuto_Click;
+            //添加夹爪信息回调
+            ArmClaw.UpdateClawMsgEvent+= UpdateClawMsg;
 
-
-            //回零
-            bt_Home.Click += Bt_Home_Click;
-            //立即停止
-            bt_StopNow.Click += Bt_StopNow_Click;
-            //正解计算
-            bt_FK.Click += Bt_FK_Click;
-            //逆解计算
-            bt_IK.Click += Bt_IK_Click;
-            //让机械臂运动
-            bt_MoveJoint.Click += Bt_MoveJoint_Click;
-            //获取当前位置
-            bt_GetCurrentAngle.Click += Bt_GetCurrentAngle_Click;
             //赋值当前角度位置
             //MainWindow_UpdateJointAngle();
 
@@ -92,6 +77,7 @@ namespace BigProject
             
         }
 
+        #region 机械臂控制
         //加载记录列表
         private void LoadJointRecords()
         {
@@ -221,6 +207,7 @@ namespace BigProject
                 bt_MoveLoop.IsEnabled = State;
                 bt_MoveLoopStop.IsEnabled = State;
                 bt_DeleteRecord.IsEnabled = State;
+                
             });
         }
         //加载串口列表
@@ -250,7 +237,7 @@ namespace BigProject
         }
 
         //自动连接
-        private void Bt_LinkAuto_Click(object sender, RoutedEventArgs e)
+        private void bt_LinkAuto_Click(object sender, RoutedEventArgs e)
         {
             var list = LoadComList();
             //连接
@@ -265,6 +252,8 @@ namespace BigProject
                         var result = App.Core.InitArm(item);
                         if (result)
                         {
+                            //查看是否存在机械臂
+                            var armConnected = false;
                             var res =App.Core.ArmSerial.SendMsgForResult(new byte[3] { 0x01, 0x33, 0x6b },out byte[] resMsg);
                             Thread.Sleep(500);
                             if (res&&resMsg[0] > 0)
@@ -276,19 +265,29 @@ namespace BigProject
                                     cb_ComList.IsEnabled = false;
                                     bt_Link.Content = "断开连接";
                                     SetButtomState(true);
-
+                                    armConnected = true;
                                     //读取位置信息并赋值
                                     MainWindow_UpdateJointAngle();
                                 });
                             }
-                            else
+                            //夹爪连接
+                            var clawConnected = false;
+                            var resClaw = App.Core.ArmSerial.SendMsgForResult(new byte[3] { 0x07, 0x33, 0x6b }, out byte[] resMsgClaw);
+                            if (resClaw && resMsgClaw[0] > 0)
                             {
-                                if(result)
-                                {
-                                    App.Core.ArmDispose();
-                                }
+                                clawConnected = true;
+                                Log.Info($"{item}连接成功，找到jyker夹爪");
+                                this.Dispatcher.Invoke(() => {
+                                    gb_ClawControl.IsEnabled = true;
+                                });
+                            }
+                            if (result&&!armConnected&&!clawConnected)
+                            {
+                                App.Core.ArmDispose();
                             }
                         }
+
+
 
                     } 
                 }
@@ -301,7 +300,7 @@ namespace BigProject
 
         }
         //手动连接
-        private void Bt_Link_Click(object sender, RoutedEventArgs e)
+        private void bt_Link_Click(object sender, RoutedEventArgs e)
         {
             if (bt_Link.Content.ToString() == "断开连接")
             {
@@ -310,6 +309,7 @@ namespace BigProject
                 bt_Link.Content = "手动连接";
                 App.Core.ArmDispose();
                 SetButtomState(false);
+                gb_ClawControl.IsEnabled = false;
             }
             else
             {
@@ -323,11 +323,12 @@ namespace BigProject
                     SetButtomState(true);
                     //读取位置信息并赋值
                     MainWindow_UpdateJointAngle();
+                    gb_ClawControl.IsEnabled = true;
                 }
             }
         }
         //获取当前电机目标位置
-        private void Bt_GetCurrentAngle_Click(object sender, RoutedEventArgs e)
+        private void bt_GetCurrentAngle_Click(object sender, RoutedEventArgs e)
         {
             MainWindow_UpdateJointAngle();
         }
@@ -375,13 +376,13 @@ namespace BigProject
         }
 
         //让机械臂运动
-        private void Bt_MoveJoint_Click(object sender, RoutedEventArgs e)
+        private void bt_MoveJoint_Click(object sender, RoutedEventArgs e)
         {
             App.Core.ArmContrl.MoveJoints();
         }
 
         //逆解计算
-        private void Bt_IK_Click(object sender, RoutedEventArgs e)
+        private void bt_IK_Click(object sender, RoutedEventArgs e)
         {
             double.TryParse(tb_X.Text, out double x);
             double.TryParse(tb_Y.Text, out double y);
@@ -405,7 +406,7 @@ namespace BigProject
             tb_Joint6.Text = Math.Round(joint.a[5], 2) + "";
         }
         //正解计算
-        private void Bt_FK_Click(object sender, RoutedEventArgs e)
+        private void bt_FK_Click(object sender, RoutedEventArgs e)
         {
             double.TryParse(tb_Joint1.Text, out double a1);
             double.TryParse(tb_Joint2.Text, out double a2);
@@ -431,13 +432,13 @@ namespace BigProject
         }
 
         //立即停止
-        private void Bt_StopNow_Click(object sender, RoutedEventArgs e)
+        private void bt_StopNow_Click(object sender, RoutedEventArgs e)
         {
             App.Core.ArmContrl.ArmStopNow();
         }
 
         //回零操作
-        private async void Bt_Home_Click(object sender, RoutedEventArgs e)
+        private async void bt_Home_Click(object sender, RoutedEventArgs e)
         {
             var result = await MessageBoxR.Show("注意！非金属减速机版本请手动回零，否则容易损坏减速器！确定要回零吗?",
                 "确认操作",
@@ -468,7 +469,73 @@ namespace BigProject
             }
             
         }
+        #endregion
 
+        #region 夹爪控制
+        bool LoopReadClawAngle = false;
+
+        private void bt_ClawHome_Click(object sender, RoutedEventArgs e)
+        {
+            App.Core.ArmClaw.Home();
+        }
+        //关闭堵转保护
+        private void bt_ClawStop_Click(object sender, RoutedEventArgs e)
+        {
+            App.Core.ArmClaw.Stop();
+        }
+        //开启循环读取信息
+        private void bt_ClawLoopStart_Click(object sender, RoutedEventArgs e)
+        {
+            LoopReadClawAngle = true;
+            bt_ClawLoopStart.IsEnabled = false;
+            bt_ClawStop.IsEnabled = true;
+            Task.Run(() => {
+                
+                while (LoopReadClawAngle)
+                {
+                    App.Core.ArmClaw.ReadAngle();
+                    Thread.Sleep(50);
+                }
+               
+            });
+        }
+        //关闭循环读取角度信息
+        private void bt_ClawLoopEnd_Click(object sender, RoutedEventArgs e)
+        {
+            LoopReadClawAngle = false;
+            bt_ClawLoopStart.IsEnabled = true;
+            bt_ClawStop.IsEnabled = false;
+        }
+        //设置夹爪角度
+        private void pg_ClawAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!gb_ClawControl.IsEnabled)
+            {
+                return;
+            }
+            var value = e.NewValue;
+            Task.Run(() =>
+            {
+                App.Core.ArmClaw.SetAngle(value);
+            });
+        }
+        //更新夹爪的信息
+        private void UpdateClawMsg(double angle,double length,double power)
+        {
+            this.Dispatcher.Invoke(() => {
+                //pg_ClawAngle.Value = angle;
+                pg_ClawLength.Value = length;
+                pg_ClawPower.Value = power;
+                tb_ClawAngle.Text = $"{angle}°";
+                tb_ClawLength.Text = $"{length}mm";
+                tb_ClawPower.Text = $"{power}";
+            });
+        }
+
+        private void pg_ClawAngle_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+        }
+        #endregion
 
 
         #region 托盘右键菜单
@@ -564,6 +631,9 @@ namespace BigProject
                 richTextLine++;
             });
         }
+
+
+
 
 
         #endregion

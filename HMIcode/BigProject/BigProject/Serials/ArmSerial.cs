@@ -243,6 +243,7 @@ namespace BigProject.Serials
             SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
         }
 
+
         /// <summary>
         /// 数字转化为多数组
         /// </summary>

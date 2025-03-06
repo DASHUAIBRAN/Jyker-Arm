@@ -18,7 +18,7 @@
                 <TextBlock FontSize="60" Grid.Column="0" Foreground="Red" Panel.ZIndex="3" x:Name="ResultTextInPic" ></TextBlock>
             </Grid>
         </Grid>
-        <Grid Grid.Column="1"   rubyer:GridHelper.RowDefinitions="300,*">
+        <Grid Grid.Column="1"   rubyer:GridHelper.RowDefinitions="300,300,*">
             <GroupBox  Header="点位循环记录">
                 <DataGrid x:Name="dg_JointRecord" rubyer:ControlHelper.FocusedForegroundBrush="{StaticResource Accent}" AutoGenerateColumns="False" BorderThickness="1" CanUserAddRows="False" GridLinesVisibility="All" IsReadOnly="True" SelectionMode="Single">
                     <DataGrid.Columns>
@@ -39,6 +39,57 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>
+            <GroupBox Header="夹爪控制" Grid.Row="1" x:Name="gb_ClawControl" IsEnabled="False">
+                <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,*">
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*,*,*" >
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_ClawHome" Click="bt_ClawHome_Click">夹爪回零</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_ClawStop" Click="bt_ClawStop_Click">夹爪关闭堵转</Button>
+                        </Grid>
+                        <Grid Grid.Column="2" Margin="2">
+                            <Button x:Name="bt_ClawLoopStart" Click="bt_ClawLoopStart_Click">开始监视信息</Button>
+                        </Grid>
+                        <Grid Grid.Column="3" Margin="2">
+                            <Button x:Name="bt_ClawLoopEnd" IsEnabled="False" Click="bt_ClawLoopEnd_Click">停止监视信息</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="1" rubyer:GridHelper.ColumnDefinitions="60,*,50,60,*,50">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>末端夹角：</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Slider Margin="0 12 0 0" Value="0" x:Name="pg_ClawAngle" Minimum="0" Maximum="90" ValueChanged="pg_ClawAngle_ValueChanged" MouseUp="pg_ClawAngle_MouseUp"></Slider>
+                        </Grid>
+                        <Grid Grid.Column="2" Margin="2">
+                            <TextBlock x:Name="tb_ClawAngle">0°</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="3" Margin="2">
+                            <TextBlock>末端长度：</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="4" Margin="2">
+                            <ProgressBar Margin="0 16 0 0" Value="0" x:Name="pg_ClawLength"></ProgressBar>
+                        </Grid>
+                        <Grid Grid.Column="5" Margin="2">
+                            <TextBlock x:Name="tb_ClawLength">50mm</TextBlock>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="2" rubyer:GridHelper.ColumnDefinitions="60,*,50,60,*,50">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>末端受力：</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <ProgressBar Margin="0 16 0 0" Value="0" x:Name="pg_ClawPower" Minimum="0" Maximum="2000"></ProgressBar>
+                        </Grid>
+                        <Grid Grid.Column="2" Margin="2">
+                            <TextBlock x:Name="tb_ClawPower" >0</TextBlock>
+                        </Grid>
+               
+                    </Grid>
+                </Grid>
+               
+            </GroupBox>
         </Grid>
         <Grid Grid.Column="2" rubyer:GridHelper.RowDefinitions="100,610,*" Margin="5,2,5,5">
 
@@ -53,8 +104,8 @@
                         </Grid>
                     </Grid>
                     <Grid Grid.Row="1" rubyer:GridHelper.ColumnDefinitions="*,*">
-                        <Button x:Name="bt_Link" Margin="2">手动连接</Button>
-                        <Button x:Name="bt_LinkAuto" Margin="2" Grid.Column="1">自动连接</Button>
+                        <Button x:Name="bt_Link" Margin="2" Click="bt_Link_Click">手动连接</Button>
+                        <Button x:Name="bt_LinkAuto" Margin="2" Grid.Column="1" Click="bt_LinkAuto_Click">自动连接</Button>
                     </Grid>
                 </Grid>
             </GroupBox>
@@ -160,26 +211,26 @@
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="13">
                         <Grid Grid.Column="0" Margin="2">
-                            <Button x:Name="bt_Home">回零</Button>
+                            <Button x:Name="bt_Home" Click="bt_Home_Click">回零</Button>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <Button x:Name="bt_StopNow">立即停止</Button>
+                            <Button x:Name="bt_StopNow" Click="bt_StopNow_Click">立即停止</Button>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="14">
                         <Grid Grid.Column="0" Margin="2">
-                            <Button x:Name="bt_FK">正解计算</Button>
+                            <Button x:Name="bt_FK" Height="26" VerticalAlignment="Top" Click="bt_FK_Click">正解计算</Button>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <Button x:Name="bt_IK">逆解计算</Button>
+                            <Button x:Name="bt_IK" Click="bt_IK_Click">逆解计算</Button>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="15">
                         <Grid Grid.Column="0" Margin="2">
-                            <Button x:Name="bt_MoveJoint">运动机械臂</Button>
+                            <Button x:Name="bt_MoveJoint" Click="bt_MoveJoint_Click">运动机械臂</Button>
                         </Grid>
                         <Grid Grid.Column="1" Margin="2">
-                            <Button x:Name="bt_GetCurrentAngle">获取当前位置</Button>
+                            <Button x:Name="bt_GetCurrentAngle" Click="bt_GetCurrentAngle_Click">获取当前位置</Button>
                         </Grid>
                     </Grid>
                     <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="16">
