@@ -83,7 +83,7 @@ namespace BigProject
         {
             App.Core.JointRecords = JointRecordRes.Read();
             dg_JointRecord.ItemsSource = App.Core.JointRecords;
-        }
+        } 
 
 
         //设置手动移动机械臂
@@ -142,6 +142,10 @@ namespace BigProject
                 {
                     Log.Info($"电机{i + 1}设置使能状态失败");
                 }
+            }
+            if (!App.Core.ArmContrl.SetIfEnable(7, true))
+            {
+                Log.Info($"夹爪设置使能状态失败");
             }
             JointLoopIsRun = true;
             Task.Run(() => {

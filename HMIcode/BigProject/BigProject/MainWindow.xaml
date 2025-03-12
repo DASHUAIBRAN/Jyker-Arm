@@ -22,6 +22,7 @@
             <GroupBox  Header="点位循环记录">
                 <DataGrid x:Name="dg_JointRecord" rubyer:ControlHelper.FocusedForegroundBrush="{StaticResource Accent}" AutoGenerateColumns="False" BorderThickness="1" CanUserAddRows="False" GridLinesVisibility="All" IsReadOnly="True" SelectionMode="Single">
                     <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Width="20" Binding="{Binding IsAjust}" Header="是否检测抓取"/>
                         <DataGridTextColumn Width="auto" Binding="{Binding J1}" Header="J1" />
                         <DataGridTextColumn Width="auto" Binding="{Binding J2}" Header="J2" />
                         <DataGridTextColumn Width="auto" Binding="{Binding J3}" Header="J3" />
@@ -72,7 +73,7 @@
                             <ProgressBar Margin="0 16 0 0" Value="0" x:Name="pg_ClawLength"></ProgressBar>
                         </Grid>
                         <Grid Grid.Column="5" Margin="2">
-                            <TextBlock x:Name="tb_ClawLength">50mm</TextBlock>
+                            <TextBlock x:Name="tb_ClawLength">0mm</TextBlock>
                         </Grid>
                     </Grid>
                     <Grid Grid.Row="2" rubyer:GridHelper.ColumnDefinitions="60,*,50,60,*,50">

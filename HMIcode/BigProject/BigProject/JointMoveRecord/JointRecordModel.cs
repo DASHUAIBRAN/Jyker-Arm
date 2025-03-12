@@ -8,6 +8,8 @@ namespace BigProject.JointMoveRecord
 {
     public class JointRecordModel
     {
+        //是否判断抓取
+        public bool IsAjust { get; set; }
         public double J1 { get; set; }
         public double J2 { get; set; }
         public double J3 { get; set; }
@@ -23,6 +25,7 @@ namespace BigProject.JointMoveRecord
         public double B { get; set; }
         public double C { get; set; }
 
+        public double ClawAngle { get; set; }
         public DateTime AddTime { get; set; }   
     }
 }

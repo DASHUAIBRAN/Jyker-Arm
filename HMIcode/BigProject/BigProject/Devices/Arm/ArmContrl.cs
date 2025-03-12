@@ -240,6 +240,7 @@ namespace BigProject.Devices.Arm
                 serialControl.LocationControl(i+1, direction, (int)(motorJ[i].Speed), (int)motorJ[i].Acceleration, pulse,RelativeOrAbsolute.Absolute);
                 Thread.Sleep(50);
             }
+
             serialControl.CallMotion();
             lastJoints = currentJoints.DeepClone();
         }
