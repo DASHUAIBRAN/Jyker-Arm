@@ -21,6 +21,8 @@ jyker 机械臂是一款开源的3D 打印机械臂，硬件分为4个部分
 
 #### 夹爪
 ![输入图片说明](Images/2025_03_06_11_50_IMG_2664.JPG)
+1.  模型在models/Claw 下面，也可以在makerworld上可以直接打印，传送门：https://makerworld.com.cn/zh/models/1006461-jyker-jia-zhua#profileId-1033256
+2.  软件还是 HMIcode/BigProject目录下。
 
 #### 安装教程
 https://www.bilibili.com/video/BV1816yYHE2C/?vd_source=d81fb23162409ba3460eb9de840d7b4a
