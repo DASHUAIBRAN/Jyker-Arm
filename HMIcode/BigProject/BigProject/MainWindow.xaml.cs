@@ -131,7 +131,7 @@ namespace BigProject
             
         }
         //循环运动机械臂
-        bool JointLoopIsRun = false;
+         bool JointLoopIsRun = false;
         private void bt_MoveLoop_Click(object sender, RoutedEventArgs e)
         {
             if (JointLoopIsRun) return;
@@ -527,12 +527,20 @@ namespace BigProject
         private void UpdateClawMsg(double angle,double length,double power)
         {
             this.Dispatcher.Invoke(() => {
-                //pg_ClawAngle.Value = angle;
-                pg_ClawLength.Value = length;
-                pg_ClawPower.Value = power;
-                tb_ClawAngle.Text = $"{angle}°";
-                tb_ClawLength.Text = $"{length}mm";
-                tb_ClawPower.Text = $"{power}";
+                try
+                {
+                    //pg_ClawAngle.Value = angle;
+                    pg_ClawLength.Value = length;
+                    pg_ClawPower.Value = power;
+                    tb_ClawAngle.Text = $"{angle}°";
+                    tb_ClawLength.Text = $"{length}mm";
+                    tb_ClawPower.Text = $"{power}";
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                }
+               
             });
         }
 
