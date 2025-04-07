@@ -1,6 +1,6 @@
-﻿using BigProject.Devices;
+﻿using BigProject.Config;
+using BigProject.Devices;
 using BigProject.Devices.Arm;
-using BigProject.Devices.Arm.Config;
 using BigProject.JointMoveRecord;
 using BigProject.Logger;
 using BigProject.Serials;
@@ -26,7 +26,7 @@ namespace BigProject
         //机械臂助手
         public ArmSerial ArmSerial;
         //配置信息
-        public ArmConfig ArmConfig { get; set; }
+        public ConfigEntity ArmConfig { get; set; }
         //机械臂控制
         public ArmContrl ArmContrl { get; set; }
         //夹爪控制
@@ -35,7 +35,7 @@ namespace BigProject
         public ObservableCollection<JointRecordModel> JointRecords = new ObservableCollection<JointRecordModel>();
         public Core()
         {
-
+            ArmConfig = ConfigResposity.ReadConfigs();
         }
 
 
@@ -48,7 +48,7 @@ namespace BigProject
                 Log.Info($"串口{comName}连接失败");
                 return false;
             }
-            ArmConfig = new ArmConfig() { D_BASE = 0, L_BASE = 161.5, L_ARM = 170, D_ELBOW = 70, L_FOREARM = 117, L_WRIST = 97 };
+            
             ArmContrl = new ArmContrl(ArmConfig, ArmSerial);
             ArmClaw = new ArmClaw(ArmSerial);
             return true;

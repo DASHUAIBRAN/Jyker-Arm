@@ -102,3 +102,5 @@ D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug
 D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\BigProject.csproj.CopyComplete
 D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\BigProject.exe
 D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\BigProject.pdb
+D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\Dialogs\ConfigDialog.g.cs
+D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\Dialogs\ConfigDialog.baml

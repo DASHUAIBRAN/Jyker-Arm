@@ -11,6 +11,25 @@
         d:DesignHeight="1024" 
         WindowStartupLocation="CenterScreen"  
         Title="JYKER" >
+    <rubyer:RubyerWindow.TitleBarContent>
+        <Menu
+   HorizontalAlignment="Right"
+   rubyer:HeaderHelper.Foreground="{DynamicResource WhiteForeground}"
+   rubyer:MenuHelper.IconWidth="30"
+   Foreground="{DynamicResource DefaultForeground}"
+   WindowChrome.IsHitTestVisibleInChrome="True">
+            <MenuItem x:Name="mt_Config" Click="mt_Config_Click">
+                <MenuItem.Header>
+                    <StackPanel rubyer:PanelHelper.Spacing="8"
+                     Orientation="Horizontal"
+                     TextBlock.Foreground="{DynamicResource WhiteForeground}">
+                        <rubyer:Icon Type="Settings2Fill" />
+                        <TextBlock FontSize="16" Text="系统设置" />
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+        </Menu>
+    </rubyer:RubyerWindow.TitleBarContent>
     <Grid rubyer:GridHelper.ColumnDefinitions="*,600,300">
         <Grid Grid.Column="0" Margin="10">
             <Image x:Name="ImageBig" ></Image>

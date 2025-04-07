@@ -1,4 +1,4 @@
-﻿using BigProject.Devices.Arm.Config;
+﻿using BigProject.Config;
 using BigProject.Devices.Arm.Kinematic.Models;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace BigProject.Devices.Arm.Kinematic
         const double M_PI = Math.PI;
         const double M_PI_2 = Math.PI / 2;
 
-        ArmConfig armConfig = new ArmConfig();
+        ConfigEntity armConfig;
 
         void MatMultiply(double[] _matrix1, double[] _matrix2, double[] _matrixOut
             , int _m, int _l, int _n)
@@ -101,7 +101,7 @@ namespace BigProject.Devices.Arm.Kinematic
             _rotationM[8] = cb * cc;
         }
 
-        public Dof6kinematic(ArmConfig armConfig)
+        public Dof6kinematic(ConfigEntity armConfig)
         {
             this.armConfig = armConfig;
 

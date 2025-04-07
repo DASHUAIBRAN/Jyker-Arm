@@ -28,6 +28,7 @@ using BigProject.Devices.Arm;
 using Rubyer;
 using BigProject.JointMoveRecord;
 using System.Collections.ObjectModel;
+using BigProject.Dialogs;
 
 namespace BigProject
 {
@@ -648,8 +649,17 @@ namespace BigProject
 
 
 
+
         #endregion
 
+        #region 菜单按钮
+        //系统设置
+        private void mt_Config_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigDialog configDialog = new ConfigDialog();
+            configDialog.ShowDialog();
+        }
+        #endregion
 
     }
 }

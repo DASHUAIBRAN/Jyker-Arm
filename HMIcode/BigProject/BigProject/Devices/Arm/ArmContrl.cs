@@ -1,5 +1,4 @@
-﻿using BigProject.Devices.Arm.Config;
-using BigProject.Devices.Arm.CtrlStep;
+﻿using BigProject.Devices.Arm.CtrlStep;
 using BigProject.Devices.Arm.Kinematic.Models;
 using BigProject.Devices.Arm.Kinematic;
 using System;
@@ -14,6 +13,7 @@ using System.IO.Ports;
 using System.Collections;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Masuit.Tools;
+using BigProject.Config;
 
 namespace BigProject.Devices.Arm
 {
@@ -30,16 +30,16 @@ namespace BigProject.Devices.Arm
         private ArmSerial serialControl;
 
         public event Action<double, double, double, double, double, double> UpdateJointAngle;
-        public ArmContrl(ArmConfig armConfig,ArmSerial armSerial)
+        public ArmContrl(ConfigEntity armConfig,ArmSerial armSerial)
         {
             dof6Solver = new Dof6kinematic(armConfig);
             motorJ = new CtrlStepMotor[6] {
-                new CtrlStepMotor(){ AngleLimitMin =-90.1,AngleLimitMax = 90.1}
-                ,new CtrlStepMotor(){ AngleLimitMin = -90.1,AngleLimitMax = 90.1 , Direction =1, OffsetAngle = -90,Reduction=50 }
-                ,new CtrlStepMotor(){ AngleLimitMin = -0.1,AngleLimitMax= 180.1,OffsetAngle = 180 , Direction = 1}
-                ,new CtrlStepMotor(){ AngleLimitMin = -0.1,AngleLimitMax = 180.1 , Direction =1}
-                ,new CtrlStepMotor(){ AngleLimitMin = -90.1 , AngleLimitMax = 90.1}
-                ,new CtrlStepMotor() { AngleLimitMin = -180.1,AngleLimitMax = 180.1}
+                new CtrlStepMotor(){ AngleLimitMin =-90.1,AngleLimitMax = 90.1,Reduction = armConfig.ReductionJ1}
+                ,new CtrlStepMotor(){ AngleLimitMin = -90.1,AngleLimitMax = 90.1 , Direction =1, OffsetAngle = -90,Reduction = armConfig.ReductionJ2 }
+                ,new CtrlStepMotor(){ AngleLimitMin = -0.1,AngleLimitMax= 180.1,OffsetAngle = 180 , Direction = 1,Reduction = armConfig.ReductionJ3}
+                ,new CtrlStepMotor(){ AngleLimitMin = -0.1,AngleLimitMax = 180.1 , Direction =1,Reduction = armConfig.ReductionJ4}
+                ,new CtrlStepMotor(){ AngleLimitMin = -90.1 , AngleLimitMax = 90.1,Reduction = armConfig.ReductionJ5}
+                ,new CtrlStepMotor() { AngleLimitMin = -180.1,AngleLimitMax = 180.1,Reduction = armConfig.ReductionJ6}
             };
             serialControl = armSerial;
             currentPose6D = new Pose6D_t();

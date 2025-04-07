@@ -115,9 +115,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Config\ConfigEntity.cs" />
+    <Compile Include="Config\ConfigResposity.cs" />
     <Compile Include="Devices\Arm\ArmLed.cs" />
     <Compile Include="Devices\Arm\ArmContrl.cs" />
-    <Compile Include="Devices\Arm\Config\ArmConfig.cs" />
     <Compile Include="Devices\Arm\CtrlStep\CtrlStepMotor.cs" />
     <Compile Include="Devices\Arm\ArmClaw.cs" />
     <Compile Include="Devices\Arm\Kinematic\Dof6kinematic.cs" />
@@ -125,10 +126,17 @@
     <Compile Include="Devices\Arm\Kinematic\Models\Joint6D_t.cs" />
     <Compile Include="Devices\Arm\Kinematic\Models\Pose6D_t.cs" />
     <Compile Include="Devices\BaseDevice.cs" />
+    <Compile Include="Dialogs\ConfigDialog.xaml.cs">
+      <DependentUpon>ConfigDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="JointMoveRecord\JointRecordModel.cs" />
     <Compile Include="JointMoveRecord\JointRecordRes.cs" />
     <Compile Include="Logger\Log.cs" />
     <Compile Include="Serials\ArmSerial.cs" />
+    <Page Include="Dialogs\ConfigDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

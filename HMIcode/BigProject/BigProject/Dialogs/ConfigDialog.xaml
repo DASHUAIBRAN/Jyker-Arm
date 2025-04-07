@@ -1,0 +1,46 @@
+﻿<rubyer:RubyerWindow x:Class="BigProject.Dialogs.ConfigDialog"
+                     xmlns:rubyer="http://rubyer.io/winfx/xaml/toolkit"
+WindowStartupLocation="CenterScreen"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+xmlns:local="clr-namespace:BigProject.Dialogs"
+mc:Ignorable="d"
+Title="系统设置"  Height="600" Width="700">
+    <Grid rubyer:GridHelper.ColumnDefinitions="300,*">
+        <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,40,40,50,20,*" >
+            <Grid Grid.Row="0" rubyer:GridHelper.ColumnDefinitions="80,*" Margin="5">
+                <TextBlock Grid.Column="0">J1减速比</TextBlock>
+                <rubyer:NumericBox x:Name="tb_ReductionJ1" Grid.Column="1" Interval="1" NumericType="Int" Value="{Binding ReductionJ1}"/>
+            </Grid>
+            <Grid Grid.Row="1" rubyer:GridHelper.ColumnDefinitions="80,*" Margin="5">
+                <TextBlock Grid.Column="0">J2减速比</TextBlock>
+                <rubyer:NumericBox x:Name="tb_ReductionJ2" Grid.Column="1" Interval="1" NumericType="Int" Value="{Binding ReductionJ2}"/>
+            </Grid>
+            <Grid Grid.Row="2" rubyer:GridHelper.ColumnDefinitions="80,*"  Margin="5">
+                <TextBlock Grid.Column="0">J3减速比</TextBlock>
+                <rubyer:NumericBox x:Name="tb_ReductionJ3" Grid.Column="1" Interval="1" NumericType="Int" Value="{Binding ReductionJ3}"/>
+            </Grid>
+            <Grid Grid.Row="3"  rubyer:GridHelper.ColumnDefinitions="80,*" Margin="5">
+                <TextBlock Grid.Column="0">J4减速比</TextBlock>
+                <rubyer:NumericBox  x:Name="tb_ReductionJ4" Grid.Column="1" Interval="1" NumericType="Int" Value="{Binding ReductionJ4}"/>
+            </Grid>
+            <Grid Grid.Row="4"  rubyer:GridHelper.ColumnDefinitions="80,*"  Margin="5">
+                <TextBlock Grid.Column="0">J5减速比</TextBlock>
+                <rubyer:NumericBox  x:Name="tb_ReductionJ5" Grid.Column="1" Interval="1" NumericType="Int" Value="{Binding ReductionJ5}"/>
+            </Grid>
+            <Grid Grid.Row="5"  rubyer:GridHelper.ColumnDefinitions="80,*"  Margin="5">
+                <TextBlock Grid.Column="0">J6减速比</TextBlock>
+                <rubyer:NumericBox  x:Name="tb_ReductionJ6"  Grid.Column="1" Interval="1" NumericType="Int"  Value="{Binding ReductionJ6}"/>
+            </Grid>
+            <Grid Grid.Row="6" rubyer:GridHelper.ColumnDefinitions="*,*">
+                <Button Margin="3,8" Grid.Column="1" x:Name="EnterOK"  Click="EnterOK_Click" >
+                    <StackPanel rubyer:PanelHelper.Spacing="8" Orientation="Horizontal"  >
+                        <TextBlock FontSize="12" Text="应用" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+    </Grid>
+</rubyer:RubyerWindow>
