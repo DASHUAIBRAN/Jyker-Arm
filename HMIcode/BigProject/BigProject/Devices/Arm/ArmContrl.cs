@@ -14,6 +14,7 @@ using System.Collections;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Masuit.Tools;
 using BigProject.Config;
+using System.Windows.Markup;
 
 namespace BigProject.Devices.Arm
 {
@@ -29,7 +30,7 @@ namespace BigProject.Devices.Arm
         public Pose6D_t currentPose6D;
         private ArmSerial serialControl;
 
-        public event Action<double, double, double, double, double, double> UpdateJointAngle;
+        public static event Action<double?, double?, double?, double?, double?, double?> UpdateJointAngle;
         public ArmContrl(ConfigEntity armConfig,ArmSerial armSerial)
         {
             dof6Solver = new Dof6kinematic(armConfig);
@@ -261,42 +262,13 @@ namespace BigProject.Devices.Arm
         }
 
         /// <summary>
-        /// 第6轴单圈回零
-        /// </summary>
-        public bool Arm6Homing()
-        {
-            int thisArmId = 6;
-            //零位编码器线性值 50962
-            var h = 54580;
-            //获取编码器当前值
-            byte[] send = new byte[3] { 0x06, 0x31, 0x6B };
-            serialControl.recCount = 5;
-            serialControl.SendMsgForResult(send, out byte[] resMsg);
-            while (serialControl.DataReceived.Count == 0)
-            {
-                Thread.Sleep(50);
-            }
-            var rec = serialControl.DataReceived;
-            if (rec.Count==5)
-            {
-                var t = rec[2]*256 + rec[3];
-                //单圈脉冲为3200；
-                var angleAbPulse = (int)Math.Abs((h - t) * 1.0 / 65536 * 3200);
-                serialControl.LocationControl(thisArmId, 0, 10, Relative_Absolute: RelativeOrAbsolute.Relative,pulse:angleAbPulse, isMultiMachine: 0);
-                Thread.Sleep(50);
-                //设置当前位为0 位
-                SendThisIsZero(thisArmId);
-            }
-            return true;
-        }
-
-        /// <summary>
         /// 立即停止
         /// </summary>
         public void ArmStopNow()
         {
-            byte[] send = new byte[5] { 0x00, 0xFE, 0x98, 0x00, 0x6B };
-            serialControl.SendMsgForResult(send, out byte[] resMsg);
+            byte[] send = new byte[4] { 0x00, 0xFE, 0x98, 0x00 };
+            var re =serialControl.ReBuildData(send);
+            serialControl.SendMsgForResult(re, out byte[] resMsg);
         }
 
         /// <summary>
@@ -305,9 +277,10 @@ namespace BigProject.Devices.Arm
         public void SendThisIsZero(int addr)
         {
             //01 0A 6D 6B
-            byte[] send = new byte[4] { 0x00, 0x0A ,0x6D, 0x6B };
+            byte[] send = new byte[3] { 0x00, 0x0A ,0x6D };
             send[0] = (byte)addr;
-            serialControl.SendMsgForResult(send, out byte[] resMsg);
+            var re = serialControl.ReBuildData(send);
+            serialControl.SendMsgForResult(re, out byte[] resMsg);
         }
 
         /// <summary>
@@ -318,10 +291,11 @@ namespace BigProject.Devices.Arm
         public bool GetCurrentAngle(int addr, CtrlStepMotor ctrlStep,out double angle)
         {
             angle = 0;
-            byte[] data = new byte[3] { (byte)addr, 0x36, 0x6B };
-            var res =serialControl.SendMsgForResult(data, out byte[] result,8);
+            byte[] data = new byte[2] { (byte)addr, 0x36 };
+            var re = serialControl.ReBuildData(data);
+            var res =serialControl.SendMsgForResult(re, out byte[] result);
             if(!res)
-            {
+             {
                 return false;
             }
             if (result[1] == 0x00 && result[2] == 0xee)
@@ -364,8 +338,9 @@ namespace BigProject.Devices.Arm
         public bool SetIfEnable(int addr,bool status)
         {
             int flag = status ? 1 : 0;
-            byte[] data = new byte[6] { (byte)addr, 0xF3, 0xAB, (byte)flag, 0x00, 0x6B };
-            var res = serialControl.SendMsgForResult(data, out byte[] result, 4);
+            byte[] data = new byte[5] { (byte)addr, 0xF3, 0xAB, (byte)flag, 0x00 };
+            var re = serialControl.ReBuildData(data);
+            var res = serialControl.SendMsgForResult(re, out byte[] result);
             if (!res)
             {
                 return false;
@@ -388,8 +363,9 @@ namespace BigProject.Devices.Arm
         {
             for (int i = 0; i < 6; i++)
             {
-                byte[] data = new byte[3] { (byte)(i+1), 0x35, 0x6B };
-                var res = serialControl.SendMsgForResult(data, out byte[] result, 6);
+                byte[] data = new byte[2] { (byte)(i+1), 0x35 };
+                var re = serialControl.ReBuildData(data);
+                var res = serialControl.SendMsgForResult(re, out byte[] result);
                 if (!res)
                 {
                     return false;
@@ -406,6 +382,63 @@ namespace BigProject.Devices.Arm
                
             }
             return true;
+        }
+        //读取电机力矩值
+        private bool ReadPower(int addr,out double outValue)
+        {
+            outValue = 0;
+            try
+            {
+                //读取状态信息 07 43 7A 6B
+                byte[] send = new byte[3] { (byte)addr, 0x43, 0x7A };
+                var re = serialControl.ReBuildData(send);
+                var result = serialControl.SendMsgForResult(re, out byte[] resMsg);
+                if (!result)
+                {
+                    return false;
+                }
+                if (resMsg[1] == 0x00 && resMsg[2] == 0xEE)
+                {
+                    return false;
+                }
+                if (resMsg[0] != addr)
+                {
+                    return false;
+                }
+
+                //根据实时相电流计算力矩大小
+                var Power = (resMsg[6] * 256 + resMsg[7]) * 1.0;
+                Power = Math.Round(Power, 2);
+                if (Power == 0)
+                {
+                    return false;
+                }
+                outValue = Power;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                return false;
+            }
+
+        }
+
+        public void ReadSixPower()
+        {
+            double?[] values = new double?[6];
+            for (int i = 1; i <= 6; i++)
+            {
+                if (ReadPower(i, out double vaule))
+                {
+                    values[i - 1] = vaule;
+                }
+                else
+                {
+                    values[i - 1] = null;
+                }
+            }
+            UpdateJointAngle?.Invoke(values[0], values[1], values[2], values[3], values[4], values[5]);
         }
     }
 }

@@ -29,6 +29,7 @@ using Rubyer;
 using BigProject.JointMoveRecord;
 using System.Collections.ObjectModel;
 using BigProject.Dialogs;
+using Newtonsoft.Json.Linq;
 
 namespace BigProject
 {
@@ -65,6 +66,9 @@ namespace BigProject
 
             //添加夹爪信息回调
             ArmClaw.UpdateClawMsgEvent+= UpdateClawMsg;
+
+            //添加机械臂信息回调
+            ArmContrl.UpdateJointAngle += UpdateArmMsg;
 
             //赋值当前角度位置
             //MainWindow_UpdateJointAngle();
@@ -132,10 +136,9 @@ namespace BigProject
             
         }
         //循环运动机械臂
-         bool JointLoopIsRun = false;
+        CancellationTokenSource cts;
         private void bt_MoveLoop_Click(object sender, RoutedEventArgs e)
         {
-            if (JointLoopIsRun) return;
             var motorJ = App.Core.ArmContrl.motorJ;
             for (int i = 0; i < motorJ.Length; i++)
             {
@@ -148,14 +151,18 @@ namespace BigProject
             {
                 Log.Info($"夹爪设置使能状态失败");
             }
-            JointLoopIsRun = true;
+            cts = new CancellationTokenSource();
+            var runCicleToken = cts.Token;
             Task.Run(() => {
-                while (JointLoopIsRun)
+                while (true)
                 {
                     Thread.Sleep(50);
                     foreach (var rec in App.Core.JointRecords)
                     {
-                        if (!JointLoopIsRun) return;
+                        if(runCicleToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
                         this.Dispatcher.Invoke(() =>
                         {
                             dg_JointRecord.SelectedItem = rec;
@@ -170,18 +177,20 @@ namespace BigProject
                         Thread.Sleep(100);
                         while (!App.Core.ArmContrl.IsMoveOver())
                         {
-                            if (!JointLoopIsRun) return;
+                            if (runCicleToken.IsCancellationRequested)
+                            {
+                                return;
+                            }
                             Thread.Sleep(2000);
                         }
                     }
                 }
-                App.Core.ArmContrl.ArmStopNow();
-            });
+            }, runCicleToken);
         }
         //停止循环
         private void bt_MoveLoopStop_Click(object sender, RoutedEventArgs e)
         {
-            JointLoopIsRun = false;
+            cts.Cancel();
         }
         //删除记录
         private void bt_DeleteRecord_Click(object sender, RoutedEventArgs e)
@@ -259,8 +268,8 @@ namespace BigProject
                         {
                             //查看是否存在机械臂
                             var armConnected = false;
-                            var res =App.Core.ArmSerial.SendMsgForResult(new byte[3] { 0x01, 0x33, 0x6b },out byte[] resMsg);
-                            Thread.Sleep(500);
+                            var re = App.Core.ArmSerial.ReBuildData(new byte[2] { 0x01, 0x33 });
+                            var res = App.Core.ArmSerial.SendMsgForResult(re, out byte[] resMsg);
                             if (res&&resMsg[0] > 0)
                             {
                                 Log.Info($"{item}连接成功，找到jyker机械臂");
@@ -268,6 +277,7 @@ namespace BigProject
                                     cb_ComList.SelectedItem = item;
                                     bt_LinkAuto.IsEnabled = false;
                                     cb_ComList.IsEnabled = false;
+                                    gb_ArmControl.IsEnabled = true;
                                     bt_Link.Content = "断开连接";
                                     SetButtomState(true);
                                     armConnected = true;
@@ -275,9 +285,11 @@ namespace BigProject
                                     MainWindow_UpdateJointAngle();
                                 });
                             }
+                            Thread.Sleep(100);
                             //夹爪连接
                             var clawConnected = false;
-                            var resClaw = App.Core.ArmSerial.SendMsgForResult(new byte[3] { 0x07, 0x33, 0x6b }, out byte[] resMsgClaw);
+                            var re1 = App.Core.ArmSerial.ReBuildData(new byte[2] { 0x07, 0x33 });
+                            var resClaw = App.Core.ArmSerial.SendMsgForResult(re1, out byte[] resMsgClaw);
                             if (resClaw && resMsgClaw[0] > 0)
                             {
                                 clawConnected = true;
@@ -329,6 +341,7 @@ namespace BigProject
                     //读取位置信息并赋值
                     MainWindow_UpdateJointAngle();
                     gb_ClawControl.IsEnabled = true;
+                    gb_ArmControl.IsEnabled = true;
                 }
             }
         }
@@ -493,7 +506,7 @@ namespace BigProject
         {
             LoopReadClawAngle = true;
             bt_ClawLoopStart.IsEnabled = false;
-            bt_ClawStop.IsEnabled = true;
+            bt_ClawLoopEnd.IsEnabled = true;
             Task.Run(() => {
                 
                 while (LoopReadClawAngle)
@@ -509,7 +522,7 @@ namespace BigProject
         {
             LoopReadClawAngle = false;
             bt_ClawLoopStart.IsEnabled = true;
-            bt_ClawStop.IsEnabled = false;
+            bt_ClawLoopEnd.IsEnabled = false;
         }
         //设置夹爪角度
         private void pg_ClawAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -631,18 +644,26 @@ namespace BigProject
         int richTextLine = 0;
         private void Log_MessageEvent(string text)
         {
-            var str = $"{DateTime.Now.ToString("HH:mm:ss")}:{text}\n";
-            this.Dispatcher.Invoke(() =>
+            try
             {
-                tbLog.AppendText(str);
-                tbLog.ScrollToEnd();
-                if (richTextLine >= 3000)
+                var str = $"{DateTime.Now.ToString("HH:mm:ss")}:{text}\n";
+                this.Dispatcher.Invoke(() =>
                 {
-                    tbLog.Text = string.Empty;
-                    richTextLine = 0;
-                }
-                richTextLine++;
-            });
+                    tbLog.AppendText(str);
+                    tbLog.ScrollToEnd();
+                    if (richTextLine >= 3000)
+                    {
+                        tbLog.Text = string.Empty;
+                        richTextLine = 0;
+                    }
+                    richTextLine++;
+                });
+            }
+            catch (Exception)
+            {
+
+            }
+           
         }
 
 
@@ -658,6 +679,77 @@ namespace BigProject
         {
             ConfigDialog configDialog = new ConfigDialog();
             configDialog.ShowDialog();
+        }
+        #endregion
+
+        #region 机械臂力矩监控
+        bool LoopReadArmAngle;
+        private void bt_ArmLoopStart_Click(object sender, RoutedEventArgs e)
+        {
+            LoopReadArmAngle = true;
+            bt_ArmLoopStart.IsEnabled = false;
+            bt_ArmLoopEnd.IsEnabled = true;
+            Task.Run(() => {
+
+                while (LoopReadArmAngle)
+                {
+                    App.Core.ArmContrl.ReadSixPower();
+                    Thread.Sleep(50);
+                }
+
+            });
+        }
+
+        private void bt_ArmLoopEnd_Click(object sender, RoutedEventArgs e)
+        {
+            LoopReadArmAngle = false;
+            bt_ArmLoopStart.IsEnabled = true;
+            bt_ArmLoopEnd.IsEnabled = false;
+        }
+
+        private void UpdateArmMsg(double? J1,double? J2, double? J3, double? J4, double? J5, double? J6)
+        {
+            this.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    if(J1!=null)
+                    {
+                        pb_pJ1.Value = J1.Value;
+                        tb_pJ1.Text = Math.Round(J1.Value, 2) + "";
+                    };
+                    if (J2 != null)
+                    {
+                        pb_pJ2.Value = J2.Value;
+                        tb_pJ2.Text = Math.Round(J2.Value, 2) + "";
+                    };
+                    if (J3 != null)
+                    {
+                        pb_pJ3.Value = J3.Value;
+                        tb_pJ3.Text = Math.Round(J3.Value, 2) + "";
+                    };
+                    if (J4 != null)
+                    {
+                        pb_pJ4.Value = J4.Value;
+                        tb_pJ4.Text = Math.Round(J4.Value, 2) + "";
+                    };
+                    if (J5 != null)
+                    {
+                        pb_pJ5.Value = J5.Value;
+                        tb_pJ5.Text = Math.Round(J5.Value, 2) + "";
+                    };
+                    if (J6 != null)
+                    {
+                        pb_pJ6.Value = J6.Value;
+                        tb_pJ6.Text = Math.Round(J6.Value, 2) + "";
+                    };
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                }
+               
+            }));
         }
         #endregion
 

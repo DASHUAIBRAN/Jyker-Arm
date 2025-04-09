@@ -9,7 +9,7 @@ xmlns:local="clr-namespace:BigProject.Dialogs"
 mc:Ignorable="d"
 Title="系统设置"  Height="600" Width="700">
     <Grid rubyer:GridHelper.ColumnDefinitions="300,*">
-        <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,40,40,50,20,*" >
+        <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,40,40,40,50,20,*" >
             <Grid Grid.Row="0" rubyer:GridHelper.ColumnDefinitions="80,*" Margin="5">
                 <TextBlock Grid.Column="0">J1减速比</TextBlock>
                 <rubyer:NumericBox x:Name="tb_ReductionJ1" Grid.Column="1" Interval="1" NumericType="Int" Value="{Binding ReductionJ1}"/>
@@ -34,7 +34,12 @@ Title="系统设置"  Height="600" Width="700">
                 <TextBlock Grid.Column="0">J6减速比</TextBlock>
                 <rubyer:NumericBox  x:Name="tb_ReductionJ6"  Grid.Column="1" Interval="1" NumericType="Int"  Value="{Binding ReductionJ6}"/>
             </Grid>
-            <Grid Grid.Row="6" rubyer:GridHelper.ColumnDefinitions="*,*">
+            <Grid Grid.Row="6"  rubyer:GridHelper.ColumnDefinitions="80,*"  Margin="5">
+                <TextBlock Grid.Column="0">校验协议</TextBlock>
+                <ComboBox  Grid.Column="1" x:Name="cb_CheckFuntion" SelectedValue="{Binding checkFunction}"/>
+            </Grid>
+           
+            <Grid Grid.Row="7" rubyer:GridHelper.ColumnDefinitions="*,*">
                 <Button Margin="3,8" Grid.Column="1" x:Name="EnterOK"  Click="EnterOK_Click" >
                     <StackPanel rubyer:PanelHelper.Spacing="8" Orientation="Horizontal"  >
                         <TextBlock FontSize="12" Text="应用" />

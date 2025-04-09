@@ -40,5 +40,14 @@ namespace BigProject.Config
         public double D_ELBOW { get; set; } = 70;
         public double L_FOREARM { get; set; } = 117;
         public double L_WRIST { get; set; } = 97;
+
+        public CheckFunction checkFunction { get; set; } = CheckFunction._0X6B;
+    }
+
+    //检验方式
+    public enum CheckFunction
+    {
+        _0X6B,
+        MODBUS
     }
 }

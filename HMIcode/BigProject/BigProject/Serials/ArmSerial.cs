@@ -1,7 +1,12 @@
-﻿using BigProject.Devices.Arm;
+﻿using BigProject.Config;
+using BigProject.Devices.Arm;
 using BigProject.Logger;
+using Castle.DynamicProxy;
+using Masuit.Tools;
+using RJCP.IO.Ports;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -13,25 +18,19 @@ namespace BigProject.Serials
 {
     public class ArmSerial
     {
-        private int LightBrightness = 0;
-        //返回的字节个数
-        public int recCount = 8;
-        public List<byte> DataReceived = new List<byte>();
-        private System.IO.Ports.SerialPort serialPort1 = new System.IO.Ports.SerialPort();
+        //串口工具
+        private SerialPortStream stream;
         public ArmSerial(string name1,out bool OpenResult)
         {
             try
             {
-                if (!serialPort1.IsOpen)
+                if (stream!=null&&stream.IsOpen)
                 {
-                    serialPort1.BaudRate = 115200;
-                    serialPort1.PortName = name1;
-                    serialPort1.Open();
-                    serialPort1.ReadTimeout = 500; // 设置读取超时时间（毫秒）
-                    serialPort1.WriteTimeout = 500; // 设置写入超时时间（毫秒）
-                    //serialPort1.DataReceived += SerialPort1_DataReceived;
-
+                    stream.Dispose();
                 }
+                stream = new SerialPortStream(name1, 115200, 8, RJCP.IO.Ports.Parity.None, RJCP.IO.Ports.StopBits.One);
+                stream.ReadTimeout = 1000;
+                stream.Open();
                 OpenResult = true;
             }
             catch (Exception)
@@ -44,91 +43,38 @@ namespace BigProject.Serials
 
         public bool SerialDispose()
         {
-            serialPort1.Close();
+            stream.Close();
             return true;
         }
-
-        //开启机械臂灯光
-        public void LedOpen()
+        public bool SendMsgForResult(byte[] msg  ,out byte[] recMsg)
         {
-            LightBrightness = 10;
-            SendMsgForResult(new byte[] { 0xFF, 0xFF, 0, 0, 0, 10,0x6B }, out byte[] msg);
-        }
-
-        //关闭机械臂灯光
-        public void LedClose()
-        {
-            LightBrightness = 0;
-            SendMsgForResult(new byte[] { 0xFF, 0xFF, 0, 0, 0, 0, 0x6B }, out byte[] msg);
-        }
-
-        public void CtrClaw(int angleA, int angleB,int angleC)
-        {
-            SendMsgForResult(new byte[] { 0xFF, 0xFF, (byte)angleA, (byte)angleB, (byte)angleC, (byte)LightBrightness, 0x6B },out byte[] msg);
-        }
-
-        //接收byte数据
-        private void SerialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
-        {
-            SerialPort sp = (SerialPort)sender;
-            byte[] rec = new byte[1024];
-            int lenth = sp.Read(rec, 0, 1024);
-            if (lenth>100)
-            {
-                return;
-            }
-            DataReceived.AddRange(rec);
-        }
-
-        //发送数据
-        public void SendMsgOnly(byte[] msg)
-        {
-            DataReceived.Clear();
-            string x = "";
-            for (int i = 0;i < msg.Length;i++)
-            {
-                x+= msg[i].ToString("x2")+" ";
-            }
-            Log.Info($"数据发送_{x}");
-            if (serialPort1.IsOpen)
-                serialPort1.Write(msg, 0, msg.Length);
-        }
-
-        public bool SendMsgForResult(byte[] msg  ,out byte[] recMsg, int readLenth=128)
-        {
-            recMsg = new byte[readLenth];
+            recMsg = new byte[msg.Length];
             try
             {
-                string x = "";
-                for (int i = 0; i < msg.Length; i++)
-                {
-                    x += msg[i].ToString("x2") + " ";
-                }
-                //Log.Info($"数据发送_{x}");
-                if (!serialPort1.IsOpen)
+                stream.Write(msg, 0, msg.Length);
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                bytesRead = stream.Read(buffer, 0, buffer.Length);
+                if(bytesRead==0)
                 {
                     return false;
-
                 }
-                serialPort1.Write(msg, 0, msg.Length);
-                Thread.Sleep(20);
-                serialPort1.Read(recMsg, 0, recMsg.Length);
-                Thread.Sleep(20);
-                string y = "";
-                for (int i = 0; i < recMsg.Length; i++)
-                {
-                    y += recMsg[i].ToString("x2") + " ";
-                }
-                //Log.Info($"数据返回_{y}");
+                recMsg = buffer.Take(bytesRead).ToArray();
+                //string z = "";
+                //for (int i = 0; i < recMsg.Length; i++)
+                //{
+                //    z += recMsg[i].ToString("x2") + " ";
+                //}
+                //Log.Info($"数据接收z_{z}");
                 return true;
             }
-            catch (System.TimeoutException)
+            catch (Exception e)
             {
+                Log.Info(e.Message);
                 return false;
             }
             
         }
-
         //多圈堵转回零
         public bool Zero(int addr = 1)
         {
@@ -187,9 +133,9 @@ namespace BigProject.Serials
             //上电自动触发回零
             bytes.Add((byte)AutoZero);
             //校验位
-            bytes.AddRange(new byte[] { 0x6B });
+            var re =ReBuildData(bytes.ToArray());
             //发送命令
-            SendMsgForResult(bytes.ToArray(),out byte[] resMsg);
+            SendMsgForResult(re,out byte[] resMsg);
             return true;
         }
 
@@ -227,9 +173,9 @@ namespace BigProject.Serials
             //是否多机同步
             bytes.Add((byte)isMultiMachine);
             //校验位
-            bytes.AddRange(new byte[] { 0x6B });
+            var re = ReBuildData(bytes.ToArray());
             //发送命令
-            SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
+            SendMsgForResult(re, out byte[] resMsg);
 
         }
 
@@ -238,9 +184,10 @@ namespace BigProject.Serials
         /// </summary>
         public void CallMotion()
         {
-            byte[] bytes = new byte[4] { 0x00, 0xFF, 0x66, 0x6B };
+            byte[] bytes = new byte[3] { 0x00, 0xFF, 0x66 };
+            var re = ReBuildData(bytes.ToArray());
             //发送命令
-            SendMsgForResult(bytes.ToArray(), out byte[] resMsg);
+            SendMsgForResult(re, out byte[] resMsg);
         }
 
 
@@ -272,6 +219,29 @@ namespace BigProject.Serials
             return bytes;
         }
 
+        //根据选择的验证方式重新整理发送内容
+        public byte[] ReBuildData(byte[] input)
+        {
+            List<byte> bytes = new List<byte>();
+            switch (App.Core.ArmConfig.checkFunction)
+            {
+                case Config.CheckFunction.MODBUS:
+                    bytes.AddRange(input);
+                    bytes.AddRange(CRC16(input));
+                    return bytes.ToArray();
+                case Config.CheckFunction._0X6B:
+                    bytes.AddRange(input);
+                    bytes.Add(0x6B);
+                    return bytes.ToArray();
+                default:
+                    break;
+            }
+            return input;
+
+
+        }
+
+        #region CRC 校验运算
         //CRC16
         public byte[] CRC16(byte[] data)
         {
@@ -295,6 +265,58 @@ namespace BigProject.Serials
             }
             return new byte[] { 0, 0 };
         }
+
+        List<byte[]> ParseMixedModbusRtu(byte[] data)
+        {
+            List<byte[]> messages = new List<byte[]>();
+            int index = 0;
+
+            while (index < data.Length)
+            {
+                if (data.Length - index < 4) break; // At least need address, function code, and CRC
+
+                // Find the end of message by searching for a valid CRC
+                bool foundValidMessage = false;
+                for (int i = index + 4; i <= data.Length; i += 1) // Start from index+4 to ensure at least one byte for data
+                {
+                    byte[] potentialMessage = new byte[i - index];
+                    Array.Copy(data, index, potentialMessage, 0, i - index);
+
+                    ushort crcReceived = (ushort)((potentialMessage[potentialMessage.Length - 2] ) | potentialMessage[potentialMessage.Length - 1] << 8);
+                    ushort crcCalculated = CalculateCRC16(potentialMessage, 0, potentialMessage.Length - 2);
+
+                    if (crcReceived == crcCalculated&&crcReceived!=0)
+                    {
+                        messages.Add(potentialMessage);
+                        index = i;
+                        foundValidMessage = true;
+                        break;
+                    }
+                }
+
+                if (!foundValidMessage) break; // No valid message found, exit loop
+            }
+
+            return messages;
+        }
+
+        ushort CalculateCRC16(byte[] data, int offset, int length)
+        {
+            ushort crc = 0xFFFF;
+
+
+            for (int pos = offset; pos < offset + length; pos++)
+            {
+                crc = (ushort)(crc ^ (data[pos]));
+                for (int j = 0; j < 8; j++)
+                {
+                    crc = (crc & 1) != 0 ? (ushort)((crc >> 1) ^ 0xA001) : (ushort)(crc >> 1);
+                }
+            }
+            return crc;
+        }
+        #endregion
+
     }
 
     //运动模式

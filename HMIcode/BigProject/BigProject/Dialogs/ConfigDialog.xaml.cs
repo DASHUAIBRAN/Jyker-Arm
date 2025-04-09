@@ -31,7 +31,6 @@ namespace BigProject.Dialogs
         //加载
         private void ConfigDialog_Loaded(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void EnterOK_Click(object sender, RoutedEventArgs e)

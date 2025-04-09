@@ -37,7 +37,7 @@
                 <TextBlock FontSize="60" Grid.Column="0" Foreground="Red" Panel.ZIndex="3" x:Name="ResultTextInPic" ></TextBlock>
             </Grid>
         </Grid>
-        <Grid Grid.Column="1"   rubyer:GridHelper.RowDefinitions="300,300,*">
+        <Grid Grid.Column="1"   rubyer:GridHelper.RowDefinitions="300,200,*">
             <GroupBox  Header="点位循环记录">
                 <DataGrid x:Name="dg_JointRecord" rubyer:ControlHelper.FocusedForegroundBrush="{StaticResource Accent}" AutoGenerateColumns="False" BorderThickness="1" CanUserAddRows="False" GridLinesVisibility="All" IsReadOnly="True" SelectionMode="Single">
                     <DataGrid.Columns>
@@ -109,6 +109,47 @@
                     </Grid>
                 </Grid>
                
+            </GroupBox>
+            <GroupBox Header="力矩信息" Grid.Row="2"  x:Name="gb_ArmControl" IsEnabled="False">
+                <Grid rubyer:GridHelper.RowDefinitions="240,50">
+                    <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,40,40,40" rubyer:GridHelper.ColumnDefinitions="40,200,50">
+
+                        <TextBlock Grid.Column="0" Grid.Row="0">J1：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="0" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000" x:Name="pb_pJ1"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="0" Margin="6" x:Name="tb_pJ1">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="1">J2：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="1" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ2"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="1" Margin="6" x:Name="tb_pJ2">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="2">J3：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="2" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ3"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="2" Margin="6" x:Name="tb_pJ3">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="3">J4：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="3" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ4"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="3" Margin="6" x:Name="tb_pJ4">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="4">J5：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="4" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ5"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Margin="6" x:Name="tb_pJ5">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="5">J6：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="5" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ6"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="5" Margin="6" x:Name="tb_pJ6">0</TextBlock>
+
+                    </Grid>
+                    <Grid rubyer:GridHelper.RowDefinitions="40" rubyer:GridHelper.ColumnDefinitions="125,125" Grid.Row="1">
+                        <Grid Grid.Row="0" Margin="2">
+                            <Button x:Name="bt_ArmLoopStart" Click="bt_ArmLoopStart_Click">开始监视信息</Button>
+                        </Grid>
+                        <Grid Grid.Column="3" Margin="2">
+                            <Button x:Name="bt_ArmLoopEnd" IsEnabled="False" Click="bt_ArmLoopEnd_Click">停止监视信息</Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                
+                
             </GroupBox>
         </Grid>
         <Grid Grid.Column="2" rubyer:GridHelper.RowDefinitions="100,610,*" Margin="5,2,5,5">

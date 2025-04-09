@@ -104,3 +104,6 @@ D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug
 D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\BigProject.pdb
 D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\Dialogs\ConfigDialog.g.cs
 D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\obj\Debug\Dialogs\ConfigDialog.baml
+D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\bin\Debug\RJCP.SerialPortStream.dll
+D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\bin\Debug\RJCP.SerialPortStream.pdb
+D:\Ducument\mywork\jyker\gitbanben\jyker\HMIcode\BigProject\BigProject\bin\Debug\RJCP.SerialPortStream.xml

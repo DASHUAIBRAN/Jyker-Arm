@@ -13,17 +13,5 @@ namespace BigProject.Devices.Arm
         public ArmLed() {
             DeviceType = DeviceType.ArmLed;
         }
-
-        //开启机械臂的灯
-        public void Open()
-        {
-            App.Core.ArmSerial.LedOpen();
-        }
-
-        //关闭机械臂的灯
-        public void Close()
-        {
-            App.Core.ArmSerial.LedClose();
-        }
     }
 }
