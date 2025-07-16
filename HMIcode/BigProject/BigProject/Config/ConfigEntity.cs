@@ -34,8 +34,8 @@ namespace BigProject.Config
         public int ReductionJ6 { get; set; } = 1;
 
         // D_BASE = 0, L_BASE = 161.5, L_ARM = 170, D_ELBOW = 70, L_FOREARM = 117, L_WRIST = 97
-        public double L_BASE { get; set; } = 0;
-        public double D_BASE { get; set; } = 161.5;
+        public double L_BASE { get; set; } = 161.5;
+        public double D_BASE { get; set; } = 0;
         public double L_ARM { get; set; } = 170;
         public double D_ELBOW { get; set; } = 70;
         public double L_FOREARM { get; set; } = 117;
