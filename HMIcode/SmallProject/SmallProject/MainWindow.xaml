@@ -1,0 +1,351 @@
+﻿<rubyer:RubyerWindow x:Class="SmallProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:rubyer="http://rubyer.io/winfx/xaml/toolkit"
+        mc:Ignorable="d"
+        TitleHeight="45" Height="1920" Width="1080" 
+        d:DesignWidth="1920" 
+        d:DesignHeight="1080" 
+        WindowStartupLocation="CenterScreen"  
+        WindowState="Maximized"
+        Title="JYKER">
+    <rubyer:RubyerWindow.TitleBarContent>
+        <Menu
+   HorizontalAlignment="Right"
+   rubyer:HeaderHelper.Foreground="{DynamicResource WhiteForeground}"
+   rubyer:MenuHelper.IconWidth="30"
+   Foreground="{DynamicResource DefaultForeground}"
+   WindowChrome.IsHitTestVisibleInChrome="True">
+            <MenuItem x:Name="mt_Config" >
+                <MenuItem.Header>
+                    <StackPanel rubyer:PanelHelper.Spacing="8"
+                     Orientation="Horizontal"
+                     TextBlock.Foreground="{DynamicResource WhiteForeground}">
+                        <rubyer:Icon Type="Settings2Fill" />
+                        <TextBlock FontSize="16" Text="系统设置" />
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+            <MenuItem x:Name="mt_MotorConfig" >
+                <MenuItem.Header>
+                    <StackPanel rubyer:PanelHelper.Spacing="8"
+         Orientation="Horizontal"
+         TextBlock.Foreground="{DynamicResource WhiteForeground}">
+                        <rubyer:Icon Type="Settings2Fill" />
+                        <TextBlock FontSize="16" Text="电机设置" />
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+        </Menu>
+    </rubyer:RubyerWindow.TitleBarContent>
+    <Grid rubyer:GridHelper.ColumnDefinitions="*,600,300">
+        <Grid Grid.Column="0" Margin="10">
+            <Image x:Name="ImageBig" ></Image>
+            <Grid rubyer:GridHelper.ColumnDefinitions="*"  VerticalAlignment="Top" HorizontalAlignment="Right">
+                <TextBlock FontSize="60" Grid.Column="0" Foreground="Red" Panel.ZIndex="3" x:Name="ResultTextInPic" ></TextBlock>
+            </Grid>
+        </Grid>
+        <Grid Grid.Column="1"   rubyer:GridHelper.RowDefinitions="300,200,*">
+            <GroupBox Header="直播间信息">
+                <TextBox BorderThickness="0" x:Name="tbLogLive" Style="{StaticResource BigTextBox}"  FontSize="20"/>
+            </GroupBox>
+            <GroupBox  Header="点位循环记录" Visibility="Collapsed">
+                <DataGrid x:Name="dg_JointRecord"  AutoGenerateColumns="False" BorderThickness="1" CanUserAddRows="False" GridLinesVisibility="All" IsReadOnly="True" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Width="20" Binding="{Binding IsAjust}" Header="是否检测抓取"/>
+                        <DataGridTextColumn Width="auto" Binding="{Binding J1}" Header="J1" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J2}" Header="J2" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J3}" Header="J3" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J4}" Header="J4" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J5}" Header="J5" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding J6}" Header="J6" />
+
+                        <DataGridTextColumn Width="auto" Binding="{Binding X}" Header="X" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding Y}" Header="Y" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding Z}" Header="Z" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding A}" Header="A" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding B}" Header="B" />
+                        <DataGridTextColumn Width="auto" Binding="{Binding C}" Header="C" />
+                        <DataGridTextColumn Visibility="Collapsed" x:Name="AddTime" Binding="{Binding AddTime}" Header="AddTime" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+            <GroupBox Header="夹爪控制" Grid.Row="1" x:Name="gb_ClawControl" IsEnabled="False">
+                <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,*">
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*,*,*" >
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_ClawHome" >夹爪回零</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_ClawStop" >夹爪关闭堵转</Button>
+                        </Grid>
+                        <Grid Grid.Column="2" Margin="2">
+                            <Button x:Name="bt_ClawLoopStart" >开始监视信息</Button>
+                        </Grid>
+                        <Grid Grid.Column="3" Margin="2">
+                            <Button x:Name="bt_ClawLoopEnd" IsEnabled="False" >停止监视信息</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="1" rubyer:GridHelper.ColumnDefinitions="60,*,50,60,*,50">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>末端夹角：</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Slider Margin="0 12 0 0" Value="0" x:Name="pg_ClawAngle" Minimum="0" Maximum="90"></Slider>
+                        </Grid>
+                        <Grid Grid.Column="2" Margin="2">
+                            <TextBlock x:Name="tb_ClawAngle">0°</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="3" Margin="2">
+                            <TextBlock>末端长度：</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="4" Margin="2">
+                            <ProgressBar Margin="0 16 0 0" Value="0" x:Name="pg_ClawLength"></ProgressBar>
+                        </Grid>
+                        <Grid Grid.Column="5" Margin="2">
+                            <TextBlock x:Name="tb_ClawLength">0mm</TextBlock>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="2" rubyer:GridHelper.ColumnDefinitions="60,*,50,60,*,50">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>末端受力：</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <ProgressBar Margin="0 16 0 0" Value="0" x:Name="pg_ClawPower" Minimum="0" Maximum="2000"></ProgressBar>
+                        </Grid>
+                        <Grid Grid.Column="2" Margin="2">
+                            <TextBlock x:Name="tb_ClawPower" >0</TextBlock>
+                        </Grid>
+
+                    </Grid>
+                </Grid>
+
+            </GroupBox>
+            <GroupBox Header="力矩信息" Grid.Row="2"  x:Name="gb_ArmControl" IsEnabled="False">
+                <Grid rubyer:GridHelper.RowDefinitions="240,50">
+                    <Grid rubyer:GridHelper.RowDefinitions="40,40,40,40,40,40,40" rubyer:GridHelper.ColumnDefinitions="40,200,50">
+
+                        <TextBlock Grid.Column="0" Grid.Row="0">J1：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="0" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000" x:Name="pb_pJ1"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="0" Margin="6" x:Name="tb_pJ1">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="1">J2：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="1" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ2"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="1" Margin="6" x:Name="tb_pJ2">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="2">J3：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="2" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ3"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="2" Margin="6" x:Name="tb_pJ3">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="3">J4：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="3" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ4"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="3" Margin="6" x:Name="tb_pJ4">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="4">J5：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="4" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ5"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="4" Margin="6" x:Name="tb_pJ5">0</TextBlock>
+
+                        <TextBlock Grid.Column="0" Grid.Row="5">J6：</TextBlock>
+                        <ProgressBar Grid.Column="1" Grid.Row="5" Margin="0 18 0 0" Value="0" Minimum="0" Maximum="2000"  x:Name="pb_pJ6"></ProgressBar>
+                        <TextBlock Grid.Column="2" Grid.Row="5" Margin="6" x:Name="tb_pJ6">0</TextBlock>
+
+                    </Grid>
+                    <Grid rubyer:GridHelper.RowDefinitions="40" rubyer:GridHelper.ColumnDefinitions="125,125" Grid.Row="1">
+                        <Grid Grid.Row="0" Margin="2">
+                            <Button x:Name="bt_ArmLoopStart" >开始监视信息</Button>
+                        </Grid>
+                        <Grid Grid.Column="3" Margin="2">
+                            <Button x:Name="bt_ArmLoopEnd" IsEnabled="False" >停止监视信息</Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Column="2" rubyer:GridHelper.RowDefinitions="100,610,*" Margin="5,2,5,5">
+
+            <GroupBox Grid.Row="0"  Header="机器手连接"  Margin="5,0,5,0">
+                <Grid rubyer:GridHelper.RowDefinitions="30,30,30,*">
+                    <Grid rubyer:GridHelper.ColumnDefinitions="auto,*">
+                        <Grid Margin="2">
+                            <Label>端口：</Label>
+                        </Grid>
+                        <Grid Margin="2" Grid.Column="1">
+                            <ComboBox x:Name="cb_ComList" />
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="1" rubyer:GridHelper.ColumnDefinitions="*,*">
+                        <Button x:Name="bt_Link" Margin="2" >手动连接</Button>
+                        <Button x:Name="bt_LinkAuto" Margin="2" Grid.Column="1" >自动连接</Button>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+            <GroupBox Grid.Row="1" Header="操作"  Margin="5,0,5,0">
+                <Grid rubyer:GridHelper.RowDefinitions="30,30,30,30,30,30,20,30,30,30,30,30,30,30,30,30,30,30,30,*">
+
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="0">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>X:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_X">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="1">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Y:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Y">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="2">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Z:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Z">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="3">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Angle_A:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_A">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="4">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Angle_B:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_B">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="5">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Angle_C:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_C">0</TextBox>
+                        </Grid>
+                    </Grid>
+
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="7">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Joint1:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Joint1">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="8">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Joint2:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Joint2">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="9">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Joint3:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Joint3">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="10">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Joint4:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Joint4">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="11">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Joint5:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Joint5">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="12">
+                        <Grid Grid.Column="0" Margin="2">
+                            <TextBlock>Joint6:</TextBlock>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <TextBox x:Name="tb_Joint6">0</TextBox>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="13">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_ApplyHomePosition" >设置当前位置为零</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_StopNow" >立即停止</Button>
+                        </Grid>
+                    </Grid>
+                    <!--<Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="14">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_FK" Height="26" VerticalAlignment="Top" >正解计算</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_IK">逆解计算</Button>
+                        </Grid>
+                    </Grid>-->
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="14">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_MoveJoint" >运动机械臂</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_GetCurrentAngle" >获取当前位置</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="15">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_MoveArmHand" >手动移动机械臂</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_AddRecord" >记录点位</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="16">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_MoveLoop" >循环运动</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_MoveLoopStop"  Cursor="Hand">停止循环</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="17">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_DeleteRecord" >删除记录</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2">
+                            <Button x:Name="bt_ConnectAi"  Cursor="Hand">连接语音助手</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid rubyer:GridHelper.ColumnDefinitions="*,*" Grid.Row="18">
+                        <Grid Grid.Column="0" Margin="2">
+                            <Button x:Name="bt_StartDetect" >开启视频</Button>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="2" Visibility="Hidden">
+                            <Button x:Name="bt_aa"  Cursor="Hand">连接语音助手</Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+            <GroupBox Grid.Row="2" Margin="5,0,5,0"  Header="日志信息" >
+                <TextBox BorderThickness="0" x:Name="tbLog" Style="{StaticResource BigTextBox}"  FontSize="12"/>
+            </GroupBox>
+        </Grid>
+
+
+    </Grid>
+</rubyer:RubyerWindow>
