@@ -388,7 +388,7 @@ void CAN_Send(CAN_TxHeaderTypeDef* pHeader, uint8_t* data)
 
      uint8_t id = (RxHeader.StdId >> 7); // 4Bits ID & 7Bits Msg
      uint8_t cmd = RxHeader.StdId & 0x7F; // 4Bits ID & 7Bits Msg
-     printf("HAL_CAN_RxFifo0MsgPendingCallback id:%d ,cmd:%d RxData[0]:%d\n",id,cmd,RxData[0]);
+     //printf("HAL_CAN_RxFifo0MsgPendingCallback id:%d ,cmd:%d RxData[0]:%d\n",id,cmd,RxData[0]);
      if (id == 0 || id == boardConfig.canNodeId)
      {
          OnCanCmd(cmd, RxData, RxHeader.DLC);

@@ -39,14 +39,14 @@ void Main()
 //            .canNodeId = defaultNodeID,
             .encoderHomeOffset = 0,
             .defaultMode = Motor::MODE_COMMAND_POSITION,
-            .currentLimit = 1 * 1000,    // A
+            .currentLimit = 2 * 1000,    // A
             .velocityLimit = 30 * motor.MOTOR_ONE_CIRCLE_SUBDIVIDE_STEPS, // r/s
             .velocityAcc = 100 * motor.MOTOR_ONE_CIRCLE_SUBDIVIDE_STEPS,   // r/s^2
             .calibrationCurrent=2000,
             .dce_kp = 200,
             .dce_kv = 80,
             .dce_ki = 300,
-            .dce_kd = 250,
+            .dce_kd = 300,
             .motor_temperature = 0.0,
             .enableMotorOnBoot=false,
             .enableStallProtect=false,
